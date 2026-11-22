@@ -1,0 +1,1494 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="theme-color" content="#F3F5FA"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Révise"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Révise la Cellule</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500&family=Lilita+One&display=swap">
+<style>
+/* Layout: app shell — sticky top bar, one 600px column, fixed bottom tab bar; sessions open as a full-screen layer */
+:root{
+  --bg:#F3F5FA; --surface:#FFFFFF; --surface-2:#ECEFF7; --ink:#1C1D4A; --muted:#5B5F86; --line:#DADEEC;
+  --accent:#D2336B; --accent-ink:#FFFFFF; --accent-soft:#FBE4ED;
+  --plant:#23845A; --plant-soft:#DDF1E6;
+  --good:#178A57; --good-soft:#DDF3E8; --bad:#C93A3A; --bad-soft:#FBE3E3; --warn:#A86F08; --warn-soft:#FBF0D6;
+  --c-cyto:#F6EEF7; --c-membrane:#9B4F96; --c-nucleus:#4B3F9E; --c-nucleus-fill:#DCD8F5; --c-mito:#D9731E; --c-mito-fill:#FCE3CC;
+  --c-re:#2F6FD1; --c-ribo:#1C1D4A; --c-golgi:#139C8F; --c-lyso:#D2336B; --c-lyso-fill:#F9D3E1; --c-centro:#7A6420;
+  --c-wall:#7A9A3A; --c-wall-fill:#EAF2D9; --c-vac:#D9ECFA; --c-vac-stroke:#5B9BD5; --c-chloro:#1F8A4C; --c-chloro-fill:#BFE7C9; --c-pcyto:#F1F6EC;
+  --shadow:0 1px 2px rgba(28,29,74,.06), 0 8px 24px rgba(28,29,74,.07);
+  --f-display:"Bricolage Grotesque","Avenir Next",system-ui,sans-serif;
+  --f-body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  --r:18px; --tab-h:64px;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0C0E1D; --surface:#151833; --surface-2:#1D2143; --ink:#E8E9F7; --muted:#A3A7CC; --line:#2A2E55;
+  --accent:#FF5A91; --accent-ink:#1A0610; --accent-soft:#3B1529; --plant:#4FCB8C; --plant-soft:#123224;
+  --good:#3CD48A; --good-soft:#12301F; --bad:#FF7A7A; --bad-soft:#3A1717; --warn:#F3B640; --warn-soft:#3A2C0E;
+  --c-cyto:#1E1B3A; --c-membrane:#D58BD0; --c-nucleus:#A79BFF; --c-nucleus-fill:#2C2766; --c-mito:#FF9F4F; --c-mito-fill:#4A2A12;
+  --c-re:#6FA2FF; --c-ribo:#E8E9F7; --c-golgi:#3FD6C6; --c-lyso:#FF5A91; --c-lyso-fill:#4A1730; --c-centro:#E0C77A;
+  --c-wall:#A7C766; --c-wall-fill:#1C2A12; --c-vac:#14304A; --c-vac-stroke:#6FB4F0; --c-chloro:#5FD68F; --c-chloro-fill:#164A2A; --c-pcyto:#17251C;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35); color-scheme:dark; } }
+:root[data-theme="dark"]{
+  --bg:#0C0E1D; --surface:#151833; --surface-2:#1D2143; --ink:#E8E9F7; --muted:#A3A7CC; --line:#2A2E55;
+  --accent:#FF5A91; --accent-ink:#1A0610; --accent-soft:#3B1529; --plant:#4FCB8C; --plant-soft:#123224;
+  --good:#3CD48A; --good-soft:#12301F; --bad:#FF7A7A; --bad-soft:#3A1717; --warn:#F3B640; --warn-soft:#3A2C0E;
+  --c-cyto:#1E1B3A; --c-membrane:#D58BD0; --c-nucleus:#A79BFF; --c-nucleus-fill:#2C2766; --c-mito:#FF9F4F; --c-mito-fill:#4A2A12;
+  --c-re:#6FA2FF; --c-ribo:#E8E9F7; --c-golgi:#3FD6C6; --c-lyso:#FF5A91; --c-lyso-fill:#4A1730; --c-centro:#E0C77A;
+  --c-wall:#A7C766; --c-wall-fill:#1C2A12; --c-vac:#14304A; --c-vac-stroke:#6FB4F0; --c-chloro:#5FD68F; --c-chloro-fill:#164A2A; --c-pcyto:#17251C;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35); color-scheme:dark; }
+
+*{box-sizing:border-box}
+html,body{background:var(--bg)}
+body{color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--bg)}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none;-webkit-appearance:none;appearance:none}
+input{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:10px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.15;letter-spacing:-.01em}
+sub{font-size:.72em;line-height:0}
+.wrap{max-width:600px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+/* top bar */
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid transparent}
+.topbar .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:10px}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--f-display);font-weight:800;font-size:18px}
+.brand svg{width:28px;height:28px}
+.streak{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:var(--surface);box-shadow:var(--shadow);font-weight:700;font-variant-numeric:tabular-nums;font-size:14px}
+.streak svg{width:16px;height:16px;color:var(--warn)}
+
+main{padding-block:8px calc(var(--tab-h) + 28px)}
+.view{display:flex;flex-direction:column;gap:22px}
+.eyebrow{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.muted{color:var(--muted)}
+.h1{font-size:clamp(28px,7.5vw,36px);font-weight:800}
+.h2{font-size:21px;font-weight:800}
+.sec-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.sec-head a,.link{color:var(--accent);font-weight:600;font-size:14px;text-decoration:none}
+
+/* cards & buttons */
+.card{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);padding:18px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:12px 18px;border-radius:14px;font-weight:700;font-size:16px;transition:transform .12s ease, background .2s}
+.btn:active{transform:scale(.97)}
+.btn svg{width:18px;height:18px}
+.btn.primary{background:var(--accent);color:var(--accent-ink)}
+.btn.soft{background:var(--accent-soft);color:var(--accent)}
+.btn.ghost{background:var(--surface-2);color:var(--ink)}
+.btn.block{width:100%}
+.btn[disabled]{opacity:.45;pointer-events:none}
+
+/* hero */
+.hero{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center}
+.ring{width:104px;height:104px;position:relative}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring .val{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-variant-numeric:tabular-nums}
+.ring .val b{font-family:var(--f-display);font-size:26px;font-weight:800;line-height:1}
+.ring .val span{font-size:11px;color:var(--muted)}
+.stats3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{background:var(--surface-2);border-radius:12px;padding:10px;text-align:center}
+.stat b{display:block;font-family:var(--f-display);font-size:20px;font-variant-numeric:tabular-nums}
+.stat span{font-size:12px;color:var(--muted)}
+.cta{display:flex;align-items:center;gap:14px;width:100%;text-align:left;padding:18px;border-radius:var(--r);background:var(--ink);color:var(--bg);box-shadow:var(--shadow);transition:transform .12s}
+.cta:active{transform:scale(.98)}
+.cta .ico{flex:none;width:48px;height:48px;border-radius:14px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center}
+.cta .ico svg{width:24px;height:24px}
+.cta b{display:block;font-family:var(--f-display);font-size:19px}
+.cta span{font-size:14px;opacity:.75}
+.cta .go{margin-left:auto;width:22px;height:22px;flex:none}
+.plan{display:flex;gap:12px;align-items:flex-start;background:var(--accent-soft);border-radius:14px;padding:14px}
+.plan svg{flex:none;width:22px;height:22px;color:var(--accent);margin-top:1px}
+.plan p{margin:0;font-size:15px}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.mode{display:flex;flex-direction:column;gap:6px;text-align:left;padding:16px;border-radius:var(--r);background:var(--surface);box-shadow:var(--shadow);min-width:0;transition:transform .12s}
+.mode:active{transform:scale(.97)}
+.mode .mi{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:var(--surface-2);color:var(--accent)}
+.mode .mi svg{width:20px;height:20px}
+.mode b{font-size:16px}
+.mode span{font-size:13px;color:var(--muted);line-height:1.35}
+
+/* topic rows */
+.tlist{display:flex;flex-direction:column;gap:10px}
+.trow{display:grid;grid-template-columns:36px 1fr auto;gap:12px;align-items:center;padding:14px;border-radius:16px;background:var(--surface);box-shadow:var(--shadow);text-align:left;width:100%;text-decoration:none;color:inherit}
+.trow .num{width:36px;height:36px;border-radius:11px;background:var(--surface-2);display:grid;place-items:center;font-family:var(--f-mono);font-size:13px;color:var(--muted)}
+.trow .num.read{background:var(--good-soft);color:var(--good)}
+.trow .num.read svg{width:18px;height:18px}
+.trow .nm{min-width:0}
+.trow .nm b{display:block;font-size:15.5px;line-height:1.25}
+.bar{height:6px;border-radius:6px;background:var(--surface-2);overflow:hidden;margin-top:7px}
+.bar span{display:block;height:100%;border-radius:6px;background:var(--accent);transition:width .6s ease}
+.pill{font-size:12px;font-weight:700;padding:4px 9px;border-radius:999px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.p-new{background:var(--surface-2);color:var(--muted)}
+.p-weak{background:var(--bad-soft);color:var(--bad)}
+.p-mid{background:var(--warn-soft);color:var(--warn)}
+.p-ok{background:var(--good-soft);color:var(--good)}
+.seg{display:flex;background:var(--surface-2);border-radius:12px;padding:4px;gap:4px}
+.seg button{flex:1;padding:8px;border-radius:9px;font-weight:600;font-size:14px;color:var(--muted)}
+.seg button.on{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+
+/* course */
+.lesson{display:flex;flex-direction:column;gap:16px}
+.lesson h3{font-size:19px;font-weight:800;margin-top:8px}
+.lesson p,.lesson ul{margin:0}
+.lesson ul{padding-left:20px;display:flex;flex-direction:column;gap:5px}
+.lesson li::marker{color:var(--accent)}
+.box{border-radius:14px;padding:14px 16px;background:var(--surface-2)}
+.box .eyebrow{display:block;margin-bottom:6px}
+.box.key{background:var(--accent-soft)}
+.box.key .eyebrow{color:var(--accent)}
+.box.plant{background:var(--plant-soft)}
+.box.plant .eyebrow{color:var(--plant)}
+.box.warn{background:var(--warn-soft)}
+.box.warn .eyebrow{color:var(--warn)}
+.eq{font-family:var(--f-mono);font-size:15px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;overflow-x:auto;white-space:nowrap;text-align:center}
+.tags{display:flex;flex-wrap:wrap;gap:8px}
+.tag{padding:6px 12px;border-radius:999px;background:var(--surface);border:1px solid var(--line);font-size:14px;font-weight:600}
+.flow{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap}
+.flow .fbx{flex:1 1 120px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center;font-size:14px}
+.flow .fbx b{display:block;font-family:var(--f-mono);font-size:13px;margin-bottom:2px}
+.flow .fbx.mid{background:var(--c-mito-fill);border-color:var(--c-mito)}
+.flow .arr{align-self:center;color:var(--muted)}
+.tbl{overflow-x:auto;border-radius:14px;border:1px solid var(--line)}
+.tbl table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:320px}
+.tbl th,.tbl td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line)}
+.tbl th{background:var(--surface-2);font-weight:700;font-size:13px}
+.tbl tr:last-child td{border-bottom:0}
+.yes{color:var(--good);font-weight:700}.no{color:var(--bad);font-weight:700}
+.figure{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);padding:12px;display:flex;flex-direction:column;gap:10px}
+.figure svg{width:100%;height:auto;display:block}
+.figcap{font-size:13.5px;color:var(--muted);text-align:center}
+.legend{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.legend button{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:var(--surface-2);font-size:13px;font-weight:600}
+.legend button i{width:10px;height:10px;border-radius:50%;display:inline-block}
+.legend button.on{background:var(--accent);color:var(--accent-ink)}
+.info{min-height:64px;background:var(--surface-2);border-radius:12px;padding:10px 12px;font-size:14.5px}
+.info b{display:block}
+.sec-nav{display:flex;gap:10px}
+.sec-nav .btn{flex:1;font-size:14px}
+.lesson-head{display:flex;flex-direction:column;gap:8px}
+
+/* svg cell */
+.org{cursor:pointer;transition:opacity .25s, filter .25s}
+.dim .org:not(.hl){opacity:.22}
+.org.hl{filter:drop-shadow(0 0 5px var(--accent))}
+.org.hl .shape{stroke:var(--accent)!important}
+.svgt{font-family:var(--f-body);font-size:11px;fill:var(--muted)}
+.svgb{font-family:var(--f-mono);font-size:12px;fill:var(--ink)}
+
+/* tab bar */
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:25;background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+.tabbar .wrap{display:grid;grid-template-columns:repeat(4,1fr);height:var(--tab-h)}
+.tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11.5px;font-weight:600;color:var(--muted);text-decoration:none}
+.tab svg{width:23px;height:23px}
+.tab.on{color:var(--accent)}
+
+/* quiz layer */
+.quiz{position:fixed;inset:0;z-index:40;background:var(--bg);overflow-y:auto;-webkit-overflow-scrolling:touch;padding-top:env(safe-area-inset-top,0px);padding-bottom:calc(env(safe-area-inset-bottom,0px) + 24px)}
+.qtop{display:flex;align-items:center;gap:12px;padding-block:12px}
+.iconbtn{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:var(--surface);box-shadow:var(--shadow);flex:none}
+.iconbtn svg{width:20px;height:20px}
+.qbar{flex:1;height:10px;border-radius:10px;background:var(--surface-2);overflow:hidden}
+.qbar span{display:block;height:100%;background:var(--accent);border-radius:10px;transition:width .4s ease}
+.qcount{font-family:var(--f-mono);font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.qwrap{display:flex;flex-direction:column;gap:18px;padding-top:6px}
+.qmeta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.chip{font-size:12.5px;font-weight:700;padding:5px 10px;border-radius:999px;background:var(--surface);box-shadow:var(--shadow)}
+.chip.warn{background:var(--warn-soft);color:var(--warn);box-shadow:none}
+.chip.exam{background:var(--ink);color:var(--bg);box-shadow:none}
+.diff{display:inline-flex;gap:3px;margin-left:auto;align-items:center;font-size:12px;color:var(--muted)}
+.diff i{width:8px;height:8px;border-radius:50%;background:var(--line);display:inline-block}
+.diff i.on{background:var(--accent)}
+.qtext{font-size:clamp(21px,5.6vw,25px);font-weight:800;line-height:1.25}
+.qkind{font-family:var(--f-mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+.choices{display:flex;flex-direction:column;gap:10px}
+.choice{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:14px 16px;min-height:56px;border-radius:14px;background:var(--surface);box-shadow:var(--shadow);border:2px solid transparent;font-size:16px;font-weight:500;transition:transform .1s, border-color .2s, background .2s}
+.choice:active{transform:scale(.985)}
+.choice .k{flex:none;width:28px;height:28px;border-radius:9px;background:var(--surface-2);display:grid;place-items:center;font-family:var(--f-mono);font-size:13px;color:var(--muted)}
+.choice.sel{border-color:var(--accent)}
+.choice.sel .k{background:var(--accent);color:var(--accent-ink)}
+.choice.ok{border-color:var(--good);background:var(--good-soft)}
+.choice.ok .k{background:var(--good);color:var(--surface)}
+.choice.ko{border-color:var(--bad);background:var(--bad-soft)}
+.choice.ko .k{background:var(--bad);color:var(--surface)}
+.choice.miss{border-color:var(--good);border-style:dashed}
+.locked .choice,.locked .mbtn{pointer-events:none}
+.tf{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tf .choice{justify-content:center;font-weight:700;font-size:18px;min-height:64px}
+.inp{display:flex;flex-direction:column;gap:10px}
+.inp input{width:100%;padding:15px 16px;border-radius:14px;border:2px solid var(--line);background:var(--surface);font-size:17px;outline:none}
+.inp input:focus{border-color:var(--accent)}
+.inp input.ok{border-color:var(--good);background:var(--good-soft)}
+.inp input.ko{border-color:var(--bad);background:var(--bad-soft)}
+.match{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mcol{display:flex;flex-direction:column;gap:8px;min-width:0}
+.mbtn{min-height:58px;padding:10px 12px;border-radius:12px;background:var(--surface);box-shadow:var(--shadow);border:2px solid transparent;font-size:14.5px;font-weight:600;text-align:left;line-height:1.3;transition:border-color .2s, background .2s}
+.mbtn.sel{border-color:var(--ink)}
+.mbtn[data-p]{border-color:var(--pc)}
+.mbtn[data-p]::before{content:attr(data-p);display:inline-grid;place-items:center;width:20px;height:20px;border-radius:6px;background:var(--pc);color:var(--surface);font-size:11px;font-family:var(--f-mono);margin-right:6px;vertical-align:1px}
+.mbtn.ok{background:var(--good-soft);border-color:var(--good)}
+.mbtn.ko{background:var(--bad-soft);border-color:var(--bad)}
+.hint{font-size:13.5px;color:var(--muted)}
+.qactions{display:flex;gap:10px;align-items:center}
+.qactions .btn{flex:1}
+.skip{font-size:14px;font-weight:600;color:var(--muted);padding:12px;text-decoration:underline;text-underline-offset:3px}
+.fb{border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:10px;animation:rise .3s ease}
+.fb.good{background:var(--good-soft)} .fb.bad{background:var(--bad-soft)}
+.fbhead{display:flex;align-items:center;gap:8px;font-family:var(--f-display);font-weight:800;font-size:19px}
+.fb.good .fbhead{color:var(--good)} .fb.bad .fbhead{color:var(--bad)}
+.fbhead svg{width:22px;height:22px}
+.fb p{margin:0;font-size:15px}
+.lvl{font-size:13.5px;font-weight:700;color:var(--accent);display:flex;gap:6px;align-items:center}
+.lvl svg{width:16px;height:16px}
+.fbact{display:flex;gap:10px;flex-wrap:wrap}
+.fbact .btn{flex:1 1 140px}
+@keyframes rise{from{transform:translateY(8px);opacity:.4}to{transform:none;opacity:1}}
+
+/* flashcard */
+.fc{perspective:1200px;min-height:280px}
+.fc-in{position:relative;min-height:280px;transition:transform .5s cubic-bezier(.2,.8,.2,1);transform-style:preserve-3d}
+.fc.flip .fc-in{transform:rotateY(180deg)}
+.fc-face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:22px;padding:24px;display:flex;flex-direction:column;justify-content:center;gap:12px;box-shadow:var(--shadow)}
+.fc-front{background:var(--surface)}
+.fc-back{background:var(--ink);color:var(--bg);transform:rotateY(180deg)}
+.fc-face .big{font-family:var(--f-display);font-size:24px;font-weight:800;line-height:1.25}
+.fc-face .eyebrow{color:inherit;opacity:.65}
+.rate{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.rate .btn{font-size:14px;padding:10px 6px}
+.rate .r0{background:var(--bad-soft);color:var(--bad)}
+.rate .r1{background:var(--warn-soft);color:var(--warn)}
+.rate .r2{background:var(--good-soft);color:var(--good)}
+
+/* summary */
+.sum-top{text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;padding-top:12px}
+.sum-top .ring{width:150px;height:150px}
+.sum-top .ring .val b{font-size:38px}
+.delta{display:flex;flex-direction:column;gap:10px}
+.drow{display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:center;background:var(--surface);border-radius:14px;padding:12px 14px;box-shadow:var(--shadow)}
+.drow .bar{grid-column:1/-1;margin-top:2px;position:relative}
+.drow small{font-family:var(--f-mono);font-size:12.5px;font-variant-numeric:tabular-nums}
+.up{color:var(--good)} .down{color:var(--bad)}
+.review{display:flex;flex-direction:column;gap:10px}
+.rv{background:var(--surface);border-radius:14px;padding:12px 14px;box-shadow:var(--shadow);font-size:14.5px;border-left:4px solid var(--bad)}
+.rv.okk{border-left-color:var(--good)}
+.rv p{margin:0}
+.rv .a{color:var(--muted);margin-top:4px}
+
+/* sheet */
+.sheet-bg{position:fixed;inset:0;z-index:60;background:rgba(10,10,30,.45);display:flex;align-items:flex-end;justify-content:center;animation:fade .2s}
+.sheet{width:100%;max-width:640px;max-height:86vh;overflow-y:auto;background:var(--bg);border-radius:22px 22px 0 0;padding:8px 0 calc(env(safe-area-inset-bottom,0px) + 24px);animation:up .28s cubic-bezier(.2,.8,.2,1)}
+.sheet .grab{width:40px;height:5px;border-radius:5px;background:var(--line);margin:4px auto 12px}
+@keyframes up{from{transform:translateY(40%)}to{transform:none}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.toast{position:fixed;left:50%;bottom:calc(var(--tab-h) + env(safe-area-inset-bottom,0px) + 16px);transform:translateX(-50%);z-index:80;background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:14px;font-weight:600;font-size:14.5px;max-width:calc(100% - 32px);box-shadow:var(--shadow);animation:rise .25s}
+.confirm{display:flex;flex-direction:column;gap:10px;background:var(--bad-soft);border-radius:14px;padding:14px}
+.confirm p{margin:0;font-size:14.5px}
+.confirm div{display:flex;gap:8px}
+.confirm .btn{flex:1;min-height:42px;font-size:14px}
+.danger{background:var(--bad);color:var(--surface)}
+.spark{display:flex;align-items:flex-end;gap:5px;height:70px}
+.spark i{flex:1;background:var(--accent);border-radius:4px 4px 2px 2px;min-height:4px;opacity:.85}
+.spark i.last{opacity:1;background:var(--ink)}
+.empty{font-size:14px;color:var(--muted)}
+/* interro, missions, coffres, rappels */
+.tabbar .wrap{grid-template-columns:repeat(5,1fr)}
+.tab{position:relative}
+.tab .badge{position:absolute;top:6px;left:calc(50% + 6px);min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--accent);color:var(--accent-ink);font-size:11px;font-weight:800;display:grid;place-items:center;font-variant-numeric:tabular-nums}
+.tright{display:flex;align-items:center;gap:8px}
+.bell{width:36px;height:36px;border-radius:999px;background:var(--surface);box-shadow:var(--shadow);display:grid;place-items:center;position:relative}
+.bell svg{width:18px;height:18px}
+.bell.on::after{content:"";position:absolute;top:7px;right:8px;width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 2px var(--surface)}
+.interro{background:var(--ink);color:var(--bg);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;gap:14px;box-shadow:var(--shadow)}
+.interro .top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.interro .cd{font-family:var(--f-display);font-weight:800;font-size:44px;line-height:1;font-variant-numeric:tabular-nums}
+.interro .cd small{font-size:15px;font-weight:600;opacity:.75;margin-left:4px}
+.interro .lab{font-size:13px;opacity:.75}
+.interro .when{font-family:var(--f-display);font-weight:800;font-size:20px;text-transform:capitalize}
+.interro .chg{color:var(--bg);opacity:.8;font-size:13px;font-weight:600;text-decoration:underline;padding:4px 0}
+.interro input[type=date]{background:var(--surface);color:var(--ink);border:0;border-radius:10px;padding:8px 10px;font-size:16px}
+.days{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 -4px;padding:0 4px}
+.days::-webkit-scrollbar{display:none}
+.day{flex:1 1 0;min-width:52px;border-radius:12px;padding:8px 6px;text-align:center;background:color-mix(in srgb,var(--bg) 12%,transparent);font-size:12px;line-height:1.25}
+.day b{display:block;font-size:13px;text-transform:capitalize}
+.day.now{background:var(--accent);color:var(--accent-ink)}
+.day.jj{outline:2px solid var(--accent);outline-offset:-2px}
+.miss{display:flex;flex-direction:column;gap:8px}
+.mrow{display:flex;align-items:center;gap:12px;background:var(--surface);border-radius:14px;padding:12px 14px;box-shadow:var(--shadow);text-align:left;width:100%;color:var(--ink);text-decoration:none}
+.mrow .ck{flex:none;width:28px;height:28px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center}
+.mrow .ck svg{width:16px;height:16px}
+.mrow.done .ck{background:var(--good);border-color:var(--good);color:var(--surface)}
+.mrow.done .tx{color:var(--muted);text-decoration:line-through}
+.mrow .tx{flex:1;font-weight:600;font-size:15px}
+.mrow .rw{flex:none;display:flex;align-items:center;gap:4px;font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.mrow .rw svg{width:30px;height:26px}
+.banner{display:flex;gap:12px;align-items:center;border-radius:14px;padding:12px 14px;background:var(--warn-soft);color:var(--ink);width:100%;text-align:left}
+.banner svg{flex:none;width:22px;height:22px;color:var(--warn)}
+.banner p{margin:0;font-size:14.5px;flex:1}
+.banner.gift{background:var(--accent-soft)}
+.banner.gift svg{color:var(--accent);width:34px;height:30px}
+.chest{overflow:visible}
+.chests{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px}
+.cbox{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 10px;border-radius:var(--r);background:var(--surface);box-shadow:var(--shadow);text-align:center}
+.cbox svg{width:96px;height:84px}
+.cbox b{font-size:14.5px}
+.cbox span{font-size:12px;color:var(--muted);line-height:1.3}
+.cbox:active{transform:scale(.97)}
+.cbox:hover .chest{animation:wob .6s}
+.coll{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:10px}
+.stk{display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;font-size:11.5px;font-weight:600;line-height:1.2}
+.stk .disc{width:72px;height:72px;border-radius:50%;display:grid;place-items:center;background:var(--surface);box-shadow:var(--shadow);border:3px solid var(--rc,var(--line));position:relative}
+.stk .disc svg{width:56px;height:56px}
+.stk .disc i{position:absolute;bottom:-4px;right:-4px;font-style:normal;background:var(--ink);color:var(--bg);font-size:11px;border-radius:9px;padding:1px 6px;font-weight:800}
+.stk.lock .disc{background:var(--surface-2);box-shadow:none;border-style:dashed;border-color:var(--line);color:var(--muted);font-family:var(--f-display);font-size:24px;font-weight:800}
+.stk.lock{color:var(--muted)}
+.themes{display:flex;flex-wrap:wrap;gap:10px}
+.th{display:flex;align-items:center;gap:8px;padding:8px 12px 8px 8px;border-radius:999px;background:var(--surface);box-shadow:var(--shadow);font-size:14px;font-weight:600;min-height:44px}
+.th i{width:26px;height:26px;border-radius:50%;background:var(--sw)}
+.th.on{outline:2.5px solid var(--accent)}
+.th.lock{opacity:.45;box-shadow:none;background:var(--surface-2)}
+.statsrow{display:flex;gap:10px;flex-wrap:wrap}
+.statsrow .card{flex:1 1 140px;padding:14px;display:flex;align-items:center;gap:10px}
+.statsrow svg{width:28px;height:28px;color:var(--accent);flex:none}
+.statsrow b{font-size:20px;font-family:var(--f-display);display:block;line-height:1.1}
+.statsrow span{font-size:12.5px;color:var(--muted)}
+.how{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;font-size:14.5px}
+.copen{position:fixed;inset:0;z-index:90;background:rgba(8,8,26,.82);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:24px;color:#fff;animation:fade .2s;overflow-y:auto}
+.copen .stage{position:relative;width:220px;height:190px;display:grid;place-items:center;flex:none}
+.copen .stage svg.chest{width:200px;height:174px;position:relative;z-index:1}
+.copen .glow{position:absolute;inset:-40px;border-radius:50%;background:radial-gradient(circle,rgba(255,226,140,.85),rgba(255,180,80,.25) 45%,transparent 70%);transform:scale(.2);opacity:0;transition:transform .6s cubic-bezier(.2,.8,.2,1),opacity .4s}
+.copen.open .glow{transform:scale(1);opacity:1}
+.copen .chest.shake{animation:shake .45s infinite}
+.chest .lid{transition:transform .5s cubic-bezier(.3,1.6,.5,1);transform-box:fill-box;transform-origin:0% 100%}
+.chest .lock{transition:opacity .2s}
+.copen.open .chest .lid{transform:translate(-2px,-20px) rotate(-16deg)}
+.copen.open .chest .lock{opacity:0}
+.copen h2{color:#fff;text-align:center}
+.rewards{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;max-width:520px;min-height:10px}
+.rwd{width:150px;background:#fff;color:#1C1D4A;border-radius:16px;padding:14px 10px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;animation:pop .45s cubic-bezier(.2,1.4,.4,1) both;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.rwd .disc{width:72px;height:72px;border-radius:50%;display:grid;place-items:center;border:3px solid var(--rc,#ccc);background:#F6F7FC}
+.rwd .disc svg{width:56px;height:56px}
+.rwd b{font-size:14.5px;line-height:1.2}
+.rwd small{font-size:12px;font-weight:700;color:var(--rc,#5B5F86)}
+.rwd .big{font-family:var(--f-display);font-weight:800;font-size:30px;color:#D2336B}
+.copen .btn{min-width:200px}
+@keyframes shake{0%,100%{transform:rotate(0)}25%{transform:rotate(-6deg) translateY(-2px)}75%{transform:rotate(6deg) translateY(-2px)}}
+@keyframes wob{0%,100%{transform:rotate(0)}30%{transform:rotate(-5deg)}60%{transform:rotate(4deg)}}
+@keyframes pop{from{transform:scale(.4) translateY(20px);opacity:0}to{transform:none;opacity:1}}
+.switch{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--surface);border-radius:14px;padding:12px 14px;box-shadow:var(--shadow);min-height:56px}
+.switch b{font-size:15px}
+.switch span{display:block;font-size:13px;color:var(--muted)}
+.tog{flex:none;width:52px;height:30px;border-radius:15px;background:var(--line);position:relative;transition:background .2s}
+.tog::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .2s}
+.tog[aria-checked=true]{background:var(--accent)}
+.tog[aria-checked=true]::after{transform:translateX(22px)}
+.switch input[type=time]{background:var(--surface-2);color:var(--ink);border:0;border-radius:10px;padding:8px 10px;font-size:16px;font-weight:700}
+.nstat{font-size:13.5px;border-radius:12px;padding:10px 12px;background:var(--surface-2)}
+.nstat.ok{background:var(--good-soft);color:var(--good)}
+.nstat.ko{background:var(--warn-soft)}
+.gains{display:flex;flex-direction:column;gap:8px;background:var(--accent-soft);border-radius:var(--r);padding:14px}
+.gains .g{display:flex;align-items:center;gap:10px;font-size:14.5px}
+.gains .g svg{width:34px;height:30px;flex:none}
+/* game home */
+.game{gap:16px}
+.gfont,.lv,.bname,.cdn,.play span,.gm b,.bub,.qh b{font-family:"Lilita One",var(--f-display);font-weight:400;letter-spacing:.01em}
+.hud{display:flex;align-items:center;gap:12px}
+.lvl{flex:1;display:flex;align-items:center;gap:10px;background:var(--surface);border-radius:16px;padding:8px 12px 8px 8px;box-shadow:0 4px 0 var(--line)}
+.lv{flex:none;width:52px;height:52px;border-radius:14px;background:linear-gradient(160deg,#7C5CFF,#4B2FD0);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:24px;line-height:1;box-shadow:inset 0 -4px 0 rgba(0,0,0,.25)}
+.lv small{font-family:var(--f-body);font-size:10px;font-weight:700;opacity:.85;text-transform:uppercase}
+.lvt{flex:1}
+.xpbar{height:14px;border-radius:7px;background:var(--surface-2);overflow:hidden;box-shadow:inset 0 2px 0 rgba(0,0,0,.08)}
+.xpbar span{display:block;height:100%;border-radius:7px;background:linear-gradient(90deg,#FFC531,#FF9A1F);box-shadow:inset 0 -3px 0 rgba(0,0,0,.15)}
+.lvt small{font-size:12px;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
+.hchest{flex:none;position:relative;width:68px;height:68px;border-radius:16px;background:var(--surface);box-shadow:0 4px 0 var(--line);display:grid;place-items:center}
+.hchest svg{width:50px;height:44px}
+.hchest.has svg{animation:wob 1.6s ease-in-out infinite}
+.hchest b{position:absolute;top:-6px;right:-6px;min-width:24px;height:24px;border-radius:12px;background:#FF3B5C;color:#fff;font-size:13px;display:grid;place-items:center;padding:0 6px;box-shadow:0 0 0 3px var(--bg)}
+.arena{position:relative;overflow:hidden;border-radius:22px;padding:16px 16px 14px;color:#fff;background:radial-gradient(120% 70% at 50% 100%,#5A2C9E 0%,transparent 60%),linear-gradient(180deg,#1A1240 0%,#2A1B66 100%);box-shadow:0 6px 0 #120C30;display:flex;flex-direction:column;gap:6px}
+.arena::before{content:"";position:absolute;inset:0;background-image:radial-gradient(2px 2px at 12% 20%,#fff8,transparent),radial-gradient(1.5px 1.5px at 80% 14%,#fff9,transparent),radial-gradient(2px 2px at 66% 40%,#fff5,transparent),radial-gradient(1.5px 1.5px at 30% 60%,#fff6,transparent),radial-gradient(2px 2px at 90% 70%,#fff5,transparent);pointer-events:none}
+.atop{position:relative;display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.tag{display:inline-block;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;background:#FF3B5C;border-radius:6px;padding:2px 7px}
+.bname{font-size:26px;line-height:1.1;margin-top:4px}
+.adate{color:#CFC6FF;font-size:13px;font-weight:600;padding:2px 0;text-transform:capitalize;min-height:32px}
+.cdn{flex:none;font-size:30px;line-height:1;background:#FFC531;color:#3A2300;border-radius:14px;padding:10px 12px;box-shadow:0 4px 0 #B07A00;transform:rotate(3deg)}
+.cdn.hot{background:#FF3B5C;color:#fff;box-shadow:0 4px 0 #A3122E;animation:pulse 1.2s ease-in-out infinite}
+.arena input[type=date]{position:relative;background:#fff;color:#1C1D4A;border:0;border-radius:10px;padding:8px 10px;font-size:16px}
+.bossbox{position:relative;height:clamp(170px,48vw,220px);display:grid;place-items:center}
+.boss{height:100%;width:auto;max-width:100%;overflow:visible}
+.boss .bob{animation:bob 2.6s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 100%}
+.boss .pupil{animation:look 5s ease-in-out infinite}
+.hp{position:relative;display:flex;align-items:center;gap:8px}
+.hpl{font-size:12px;font-weight:800;background:#FF3B5C;border-radius:6px;padding:2px 6px}
+.hpbar{flex:1;height:18px;border-radius:9px;background:#0E0A26;border:2px solid #fff3;overflow:hidden}
+.hpbar span{display:block;height:100%;background:linear-gradient(90deg,#FF3B5C,#FF7A59);box-shadow:inset 0 -4px 0 rgba(0,0,0,.2);transition:width .6s}
+.hp b{font-family:"Lilita One",var(--f-display);font-weight:400;font-size:20px;min-width:38px;text-align:right;font-variant-numeric:tabular-nums}
+.ahint{position:relative;margin:2px 0 0;font-size:13px;color:#CFC6FF}
+.play{display:flex;flex-direction:column;align-items:center;gap:2px;width:100%;padding:14px 18px 16px;border-radius:20px;background:linear-gradient(180deg,#3DDC84,#1FB866);color:#fff;box-shadow:0 7px 0 #138A4A,0 12px 24px rgba(31,184,102,.35);transition:transform .08s,box-shadow .08s}
+.play span{font-size:34px;line-height:1;text-transform:uppercase;text-shadow:0 3px 0 rgba(0,0,0,.18)}
+.play small{font-size:13.5px;font-weight:700;opacity:.92}
+.play:active{transform:translateY(6px);box-shadow:0 1px 0 #138A4A}
+.tip{display:flex;gap:10px;align-items:flex-start;font-size:14px;color:var(--muted)}
+.tip svg{flex:none;width:20px;height:20px;color:#FFB020}
+.tip p{margin:0}
+.quests{background:var(--surface);border-radius:20px;padding:14px;box-shadow:0 5px 0 var(--line);display:flex;flex-direction:column;gap:8px}
+.qh{display:flex;justify-content:space-between;align-items:center}
+.qh b{font-size:20px}
+.qh span{font-weight:800;color:var(--muted);font-variant-numeric:tabular-nums}
+.qseg{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:4px}
+.qseg i{height:8px;border-radius:4px;background:var(--surface-2)}
+.qseg i.on{background:#3DDC84}
+.qrow{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:10px;border-radius:14px;background:var(--surface-2);color:var(--ink);text-decoration:none;min-height:56px}
+.qrow .ck{flex:none;width:26px;height:26px;border-radius:8px;border:2.5px solid var(--line);display:grid;place-items:center;background:var(--surface)}
+.qrow .ck svg{width:16px;height:16px}
+.qrow.done .ck{background:#3DDC84;border-color:#1FB866;color:#fff}
+.qrow.done .tx{color:var(--muted);text-decoration:line-through}
+.qrow .tx{flex:1;font-weight:700;font-size:14.5px;line-height:1.3;display:flex;flex-direction:column;gap:6px}
+.mini{display:block;height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+.mini span{display:block;height:100%;background:#FFB020}
+.qrow .rw{flex:none;display:flex;align-items:center;gap:4px}
+.qrow .rw em{font-style:normal;font-size:12px;font-weight:800;color:var(--muted);font-variant-numeric:tabular-nums}
+.qrow .rw svg{width:30px;height:26px}
+.qrow.done .rw svg{opacity:.35}
+.qfoot{margin:2px 0 0;font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.qfoot svg{width:24px;height:21px}
+.gmodes{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.gm{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:14px;border-radius:18px;color:#fff;text-align:left;text-decoration:none;min-height:112px;transition:transform .08s,box-shadow .08s}
+.gm svg{width:28px;height:28px;margin-bottom:auto;opacity:.95}
+.gm b{font-size:19px;line-height:1.1;margin-top:8px}
+.gm span{font-size:12.5px;font-weight:600;opacity:.9;line-height:1.3}
+.gm:active{transform:translateY(4px)}
+.m1{background:#F2475B;box-shadow:0 5px 0 #A82334}.m1:active{box-shadow:0 1px 0 #A82334}
+.m2{background:#2F80ED;box-shadow:0 5px 0 #1B57A8}.m2:active{box-shadow:0 1px 0 #1B57A8}
+.m3{background:#13A88A;box-shadow:0 5px 0 #0B7560}.m3:active{box-shadow:0 1px 0 #0B7560}
+.m4{background:#7C4DFF;box-shadow:0 5px 0 #4F2BBF}.m4:active{box-shadow:0 1px 0 #4F2BBF}
+.maph{display:flex;justify-content:space-between;align-items:baseline;margin-top:6px}
+.map{position:relative;margin:0 -4px}
+.map .trail{position:absolute;inset:0;width:100%;height:100%}
+.node{position:absolute;transform:translateX(-50%);width:120px;display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;color:var(--ink)}
+.bub{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;font-size:28px;color:#fff;background:#B3B8D6;box-shadow:0 6px 0 #8A8FB0,inset 0 -5px 0 rgba(0,0,0,.12)}
+.node.go .bub{background:linear-gradient(180deg,#9B7BFF,#6C47F5);box-shadow:0 6px 0 #4A2DB8,inset 0 -5px 0 rgba(0,0,0,.12)}
+.node.gold .bub{background:linear-gradient(180deg,#FFD54A,#FFAE1A);color:#6A3B00;box-shadow:0 6px 0 #C07800,inset 0 -5px 0 rgba(0,0,0,.1)}
+.node.rec .bub{outline:4px solid #3DDC84;outline-offset:4px;animation:pulse 1.4s ease-in-out infinite}
+.node:active .bub{transform:translateY(4px);box-shadow:0 2px 0 #4A2DB8}
+.st{display:flex;gap:1px;margin-top:6px;font-size:15px;line-height:1}
+.st i{font-style:normal;color:var(--line)}
+.st i.on{color:#FFB020}
+.nl{font-size:12.5px;font-weight:800;text-align:center;line-height:1.15}
+.flag{position:absolute;top:-14px;z-index:1;background:#3DDC84;color:#073D20;font-size:11px;font-weight:900;padding:2px 8px;border-radius:8px;box-shadow:0 2px 0 #1FB866}
+@keyframes bob{0%,100%{transform:translateY(0) scale(1,1)}50%{transform:translateY(-8px) scale(1.02,.98)}}
+@keyframes look{0%,40%,100%{transform:translate(0,0)}50%,70%{transform:translate(-8px,2px)}80%,90%{transform:translate(6px,-2px)}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+.cdn.hot{animation:none}
+.sync{margin:0;font-size:13.5px;border-radius:12px;padding:10px 12px;background:var(--surface-2);color:var(--muted)}
+.sync.ok{background:var(--good-soft);color:var(--good)}
+.sync.err,.sync.local,.sync.slow{background:var(--warn-soft);color:var(--ink)}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+
+<header class="topbar"><div class="wrap">
+  <div class="brand"><svg viewBox="0 0 32 32" aria-hidden="true"><ellipse cx="16" cy="16" rx="14" ry="12.5" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2"/><circle cx="14" cy="15" r="5.2" fill="var(--c-nucleus-fill)" stroke="var(--c-nucleus)" stroke-width="1.8"/><ellipse cx="23" cy="20" rx="3.4" ry="1.7" fill="var(--c-mito-fill)" stroke="var(--c-mito)" stroke-width="1.3" transform="rotate(-25 23 20)"/></svg>Révise la Cellule</div>
+  <div class="tright"><button class="bell" id="bell" aria-label="Rappels"></button><div class="streak" id="streak" title="Jours de révision d’affilée"></div></div>
+</div></header>
+<main><div class="wrap" id="view"></div></main>
+<nav class="tabbar" aria-label="Navigation"><div class="wrap" id="tabs"></div></nav>
+<div class="quiz" id="quiz" hidden></div>
+
+<script>
+"use strict";
+/* ---------- helpers ---------- */
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const sig=x=>1/(1+Math.exp(-x));
+const ICON={
+ home:'<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+ book:'<path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H20v15H5.5A1.5 1.5 0 0 0 4 19.5z"/><path d="M4 19.5A1.5 1.5 0 0 0 5.5 21H20v-3"/><path d="M9 7h7"/>',
+ target:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/>',
+ chart:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+ flame:'<path d="M12 22c4.4 0 7-2.9 7-6.6 0-3.6-2.4-5.6-4-8.4-.5 2-1.6 3.1-2.8 3.4C12.8 7.6 11.6 4.6 9 2c.2 3.4-1.4 5.5-3 7.6C4.9 11 5 12.6 5 15.4 5 19.1 7.6 22 12 22z"/>',
+ x:'<path d="M6 6l12 12M18 6 6 18"/>',
+ check:'<path d="M4 12.5 9.5 18 20 6"/>',
+ arrow:'<path d="M5 12h14M13 6l6 6-6 6"/>',
+ back:'<path d="M19 12H5M11 6l-6 6 6 6"/>',
+ spark:'<path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8"/>',
+ cards:'<rect x="3" y="6" width="13" height="15" rx="2"/><path d="M8 3h11a2 2 0 0 1 2 2v13"/>',
+ redo:'<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>',
+ exam:'<path d="M9 3h6l1 2h3v16H5V5h3z"/><path d="M9 12l2 2 4-4"/>',
+ up:'<path d="M12 19V5M6 11l6-6 6 6"/>',
+ bell:'<path d="M6 8a6 6 0 0 1 12 0c0 7 3 8 3 8H3s3-1 3-8"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/>',
+ chest:'<path d="M3 11a6 6 0 0 1 6-6h6a6 6 0 0 1 6 6v9H3z"/><path d="M3 12h18"/><path d="M10 12v3h4v-3"/>',
+ bulb:'<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/>'
+};
+const ic=(n,extra='')=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" ${extra}>${ICON[n]}</svg>`;
+const G='C<sub>6</sub>H<sub>12</sub>O<sub>6</sub>', O2='O<sub>2</sub>', CO2='CO<sub>2</sub>', H2O='H<sub>2</sub>O';
+
+/* ---------- course ---------- */
+const TOPICS=[
+ {id:'organisation',short:'Organisation',name:'Organisation générale'},
+ {id:'membrane',short:'Membrane',name:'La membrane plasmique'},
+ {id:'cytoplasme',short:'Cytoplasme',name:'Cytoplasme & hyaloplasme'},
+ {id:'mitochondries',short:'Mitochondries',name:'Mitochondries & énergie'},
+ {id:'reticulum',short:'Réticulum',name:'Réticulum & ribosomes'},
+ {id:'golgi',short:'Golgi',name:'L’appareil de Golgi'},
+ {id:'lysosomes',short:'Lysosomes',name:'Les lysosomes'},
+ {id:'vegetale',short:'Végétale',name:'La cellule végétale'}
+];
+const TMAP=Object.fromEntries(TOPICS.map(t=>[t.id,t]));
+
+const ORG={
+ membrane:{name:'Membrane plasmique',role:'Enveloppe la cellule, assure les échanges avec l’extérieur avec une perméabilité sélective.',t:'membrane',col:'--c-membrane'},
+ noyau:{name:'Noyau',role:'Contient le matériel génétique. Il ne fait pas partie du cytoplasme.',t:'organisation',col:'--c-nucleus'},
+ mito:{name:'Mitochondrie',role:'Siège de la respiration cellulaire, produit l’ATP : la « centrale énergétique ».',t:'mitochondries',col:'--c-mito'},
+ rer:{name:'Réticulum endoplasmique rugueux',role:'Feuillets couverts de ribosomes : synthèse des protéines.',t:'reticulum',col:'--c-re'},
+ rel:{name:'Réticulum endoplasmique lisse',role:'Sans ribosomes : synthèse des lipides grâce aux enzymes de sa membrane.',t:'reticulum',col:'--c-re'},
+ golgi:{name:'Appareil de Golgi',role:'Dictyosomes (sacs aplatis empilés) qui emballent les produits de synthèse dans des vésicules.',t:'golgi',col:'--c-golgi'},
+ lyso:{name:'Lysosome',role:'« Poubelle » de la cellule : ses enzymes décomposent aliments et corps étrangers.',t:'lysosomes',col:'--c-lyso'},
+ centro:{name:'Centrosome',role:'Organite du cytoplasme cité dans ton cours (son rôle n’y est pas détaillé).',t:'cytoplasme',col:'--c-centro'},
+ paroi:{name:'Enveloppe (paroi)',role:'Résistante, non vivante, rigide et élastique : elle renforce la membrane.',t:'vegetale',col:'--c-wall'},
+ vacuole:{name:'Vacuole',role:'Remplie d’eau, de sels minéraux et de glucides simples : rigidité et élasticité de la plante.',t:'vegetale',col:'--c-vac-stroke'},
+ chloro:{name:'Chloroplaste',role:'Organite aplati rempli de chlorophylle : réalise la photosynthèse à la lumière.',t:'vegetale',col:'--c-chloro'}
+};
+
+/* ---------- diagrams ---------- */
+const f=n=>Math.round(n*10)/10;
+function mitoShape(x,y,rot,s=1){return `<g class="org" data-org="mito" transform="translate(${x} ${y}) rotate(${rot}) scale(${s})"><ellipse class="shape" rx="22" ry="10" fill="var(--c-mito-fill)" stroke="var(--c-mito)" stroke-width="2.2"/><polyline points="-16,0 -12,-6 -8,5 -4,-6 0,5 4,-6 8,5 12,-6 16,0" fill="none" stroke="var(--c-mito)" stroke-width="1.4" stroke-linejoin="round"/></g>`;}
+function lysoShape(x,y){return `<g class="org" data-org="lyso"><circle class="shape" cx="${x}" cy="${y}" r="7.5" fill="var(--c-lyso-fill)" stroke="var(--c-lyso)" stroke-width="2"/><circle cx="${x-2}" cy="${y-2}" r="1.3" fill="var(--c-lyso)"/><circle cx="${x+2.5}" cy="${y+1}" r="1.3" fill="var(--c-lyso)"/><circle cx="${x-1}" cy="${y+3}" r="1.1" fill="var(--c-lyso)"/></g>`;}
+function chloroShape(x,y,rot){return `<g class="org" data-org="chloro" transform="translate(${x} ${y}) rotate(${rot})"><ellipse class="shape" rx="18" ry="8" fill="var(--c-chloro-fill)" stroke="var(--c-chloro)" stroke-width="2"/><path d="M-9,-4v8M-3,-4.5v9M3,-4.5v9M9,-4v8" stroke="var(--c-chloro)" stroke-width="1.6" stroke-linecap="round"/></g>`;}
+function golgiShape(x,y,s=1){let p='';for(let i=0;i<4;i++){p+=`<path class="shape" d="M${x-24*s+i*2*s},${y+i*7*s} Q${x},${y-9*s+i*7*s} ${x+24*s-i*2*s},${y+i*7*s}" fill="none" stroke="var(--c-golgi)" stroke-width="${4.5*s}" stroke-linecap="round"/>`;}
+ p+=`<circle cx="${x+30*s}" cy="${y+5*s}" r="${3.4*s}" fill="none" stroke="var(--c-golgi)" stroke-width="${1.8*s}"/><circle cx="${x+27*s}" cy="${y+22*s}" r="${3*s}" fill="none" stroke="var(--c-golgi)" stroke-width="${1.8*s}"/><circle cx="${x-30*s}" cy="${y+16*s}" r="${3*s}" fill="none" stroke="var(--c-golgi)" stroke-width="${1.8*s}"/>`;
+ return `<g class="org" data-org="golgi">${p}</g>`;}
+function svgAnimal(){
+ const cx=150,cy=120; let rer='';
+ [46,55,64].forEach(r=>{const a0=-55*Math.PI/180,a1=70*Math.PI/180;
+  rer+=`<path class="shape" d="M${f(cx+r*Math.cos(a0))},${f(cy+r*Math.sin(a0))} A${r},${r} 0 0 1 ${f(cx+r*Math.cos(a1))},${f(cy+r*Math.sin(a1))}" fill="none" stroke="var(--c-re)" stroke-width="3.6" stroke-linecap="round"/>`;
+  for(let a=-50;a<=66;a+=12){const t=a*Math.PI/180,rr=r+3.6;rer+=`<circle cx="${f(cx+rr*Math.cos(t))}" cy="${f(cy+rr*Math.sin(t))}" r="1.5" fill="var(--c-ribo)"/>`;}
+ });
+ return `<svg viewBox="0 0 320 240" role="img" aria-label="Schéma d’une cellule animale">
+ <g class="org" data-org="membrane"><path class="shape" d="M30,120 C30,50 90,18 165,18 C245,18 292,60 292,118 C292,185 240,222 160,222 C80,222 30,190 30,120Z" fill="var(--c-cyto)" stroke="var(--c-membrane)" stroke-width="4"/></g>
+ <g class="org" data-org="rer">${rer}</g>
+ <g class="org" data-org="rel"><path class="shape" d="M52,152 q8,-8 16,0 t16,0 t16,0" fill="none" stroke="var(--c-re)" stroke-width="3.4" stroke-linecap="round"/><path class="shape" d="M56,163 q8,-8 16,0 t16,0 t14,0" fill="none" stroke="var(--c-re)" stroke-width="3.4" stroke-linecap="round"/></g>
+ <g class="org" data-org="noyau"><circle class="shape" cx="${cx}" cy="${cy}" r="34" fill="var(--c-nucleus-fill)" stroke="var(--c-nucleus)" stroke-width="3"/><circle cx="${cx-6}" cy="${cy+4}" r="9" fill="var(--c-nucleus)" opacity=".55"/></g>
+ ${golgiShape(228,52)}
+ ${mitoShape(84,80,-25)}${mitoShape(246,160,25)}${mitoShape(110,188,8)}
+ ${lysoShape(60,124)}${lysoShape(200,200)}${lysoShape(268,112)}
+ <g class="org" data-org="centro" transform="translate(150 176)"><rect class="shape" x="-8" y="-3" width="16" height="6" rx="2" fill="var(--surface)" stroke="var(--c-centro)" stroke-width="2"/><rect class="shape" x="5" y="-1" width="6" height="14" rx="2" fill="var(--surface)" stroke="var(--c-centro)" stroke-width="2"/></g>
+ </svg>`;}
+function svgPlant(){
+ return `<svg viewBox="0 0 320 240" role="img" aria-label="Schéma d’une cellule végétale">
+ <g class="org" data-org="paroi"><rect class="shape" x="8" y="8" width="304" height="224" rx="16" fill="var(--c-wall-fill)" stroke="var(--c-wall)" stroke-width="7"/></g>
+ <g class="org" data-org="membrane"><rect class="shape" x="19" y="19" width="282" height="202" rx="10" fill="var(--c-pcyto)" stroke="var(--c-membrane)" stroke-width="2.4"/></g>
+ <g class="org" data-org="vacuole"><rect class="shape" x="88" y="58" width="190" height="128" rx="42" fill="var(--c-vac)" stroke="var(--c-vac-stroke)" stroke-width="2.4"/></g>
+ <g class="org" data-org="noyau"><circle class="shape" cx="52" cy="120" r="24" fill="var(--c-nucleus-fill)" stroke="var(--c-nucleus)" stroke-width="2.6"/><circle cx="48" cy="123" r="7" fill="var(--c-nucleus)" opacity=".55"/></g>
+ ${chloroShape(110,38,0)}${chloroShape(175,38,0)}${chloroShape(238,38,0)}${chloroShape(290,120,90)}${chloroShape(130,203,0)}${chloroShape(205,203,0)}${chloroShape(46,188,-35)}${chloroShape(46,54,35)}
+ ${mitoShape(282,36,0,.55)}${mitoShape(268,204,0,.55)}
+ </svg>`;}
+function svgBilayer(){
+ let s='';const prot=[[96,140],[232,266]];
+ const inProt=x=>prot.some(([a,b])=>x>a-6&&x<b+6);
+ for(let x=14;x<=320;x+=12){ if(inProt(x)) continue;
+  s+=`<path d="M${x-2},46 L${x-3},70 M${x+2},46 L${x+3},70" stroke="var(--c-membrane)" stroke-width="1.5" fill="none" stroke-linecap="round"/><circle cx="${x}" cy="40" r="5.5" fill="var(--c-membrane)"/>`;
+  s+=`<path d="M${x-2},104 L${x-3},80 M${x+2},104 L${x+3},80" stroke="var(--c-membrane)" stroke-width="1.5" fill="none" stroke-linecap="round"/><circle cx="${x}" cy="110" r="5.5" fill="var(--c-membrane)"/>`;}
+ return `<svg viewBox="0 0 334 160" role="img" aria-label="Bicouche de phospholipides traversée par des protéines">
+ <text x="4" y="16" class="svgt">extérieur de la cellule</text><text x="4" y="152" class="svgt">intérieur (cytoplasme)</text>
+ ${s}
+ <ellipse cx="118" cy="75" rx="24" ry="50" fill="var(--c-mito-fill)" stroke="var(--c-mito)" stroke-width="2.2"/>
+ <ellipse cx="249" cy="75" rx="19" ry="46" fill="var(--c-mito-fill)" stroke="var(--c-mito)" stroke-width="2.2"/>
+ <ellipse cx="186" cy="124" rx="14" ry="9" fill="var(--c-mito-fill)" stroke="var(--c-mito)" stroke-width="2"/>
+ <text x="118" y="79" text-anchor="middle" class="svgb" style="font-size:10px">protéine</text>
+ </svg>`;}
+function svgATP(){
+ return `<svg viewBox="0 0 320 140" role="img" aria-label="Cycle ADP ATP">
+ <defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10z" fill="var(--accent)"/></marker>
+ <marker id="ah2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10z" fill="var(--c-re)"/></marker></defs>
+ <rect x="12" y="50" width="96" height="40" rx="12" fill="var(--surface-2)" stroke="var(--line)"/><text x="60" y="75" text-anchor="middle" class="svgb">ADP + P</text>
+ <rect x="212" y="50" width="96" height="40" rx="12" fill="var(--accent-soft)" stroke="var(--accent)"/><text x="260" y="75" text-anchor="middle" class="svgb" style="font-weight:700">ATP</text>
+ <path d="M100,48 Q160,6 220,48" fill="none" stroke="var(--accent)" stroke-width="2.4" marker-end="url(#ah)"/>
+ <text x="160" y="20" text-anchor="middle" class="svgt">+ E (respiration, mitochondrie)</text>
+ <path d="M220,92 Q160,134 100,92" fill="none" stroke="var(--c-re)" stroke-width="2.4" marker-end="url(#ah2)"/>
+ <text x="160" y="134" text-anchor="middle" class="svgt">libère E (on utilise de l’eau)</text>
+ </svg>`;}
+function svgGolgi(){
+ let p='';for(let i=0;i<5;i++){p+=`<path d="M${100+i*3},${40+i*14} Q160,${24+i*14} ${220-i*3},${40+i*14}" fill="none" stroke="var(--c-golgi)" stroke-width="7" stroke-linecap="round"/>`;}
+ const v=[[236,44,6],[250,62,5],[236,90,5.5],[84,60,5],[80,96,6]];
+ v.forEach(([x,y,r])=>p+=`<circle cx="${x}" cy="${y}" r="${r}" fill="var(--c-lyso-fill)" stroke="var(--c-golgi)" stroke-width="2"/>`);
+ return `<svg viewBox="0 0 320 130" role="img" aria-label="Dictyosome et vésicules">${p}
+ <text x="160" y="118" text-anchor="middle" class="svgt">dictyosome : sacs aplatis empilés</text>
+ <text x="262" y="96" class="svgt">vésicules</text></svg>`;}
+const DIAGRAMS={animal:svgAnimal,plant:svgPlant,bilayer:svgBilayer,atp:svgATP,golgi:svgGolgi};
+const CELL_ORGS={animal:['membrane','noyau','mito','rer','rel','golgi','lyso','centro'],plant:['paroi','membrane','vacuole','chloro','noyau','mito']};
+
+const SECTIONS={
+organisation:{keys:['Toute cellule = membrane + cytoplasme + noyau.','Une bactérie est une cellule.','Un virus n’est pas une cellule : il ne peut pas se reproduire tout seul.'],html:()=>`
+<p class="muted">La cellule animale. Toute cellule, quelle qu’elle soit, est organisée de la même façon.</p>
+<div class="box key"><span class="eyebrow">Organisation générale</span>Une cellule comprend trois parties :
+<ul style="margin-top:6px"><li><b>la membrane</b> (cellulaire, cytoplasmique ou plasmique : ce sont trois noms pour la même chose) ;</li><li><b>le cytoplasme</b> ;</li><li><b>le noyau</b>.</li></ul></div>
+<div class="figure" data-cell="animal"></div>
+<h3>Cellule ou pas cellule ?</h3>
+<ul><li><b>Bactérie</b> → c’est une cellule.</li><li><b>Virus</b> → ne peut pas se reproduire tout seul : il a du matériel génétique, mais il a besoin d’une cellule pour se multiplier.</li></ul>
+<div class="box warn"><span class="eyebrow">Consigne du prof</span>Savoir <b>reconnaître</b> les organites, les <b>schématiser</b> (à peu près), connaître leurs <b>rôles</b> et les <b>types de tissus / cellules</b> où on les trouve en grand nombre.</div>`},
+membrane:{keys:['Structure en « mosaïque fluide ».','Bicouche de phospholipides + protéines dispersées.','Replis → plus de surface de contact et d’échanges.','Rôle : relations avec l’extérieur, perméabilité sélective.','Reliée au cytosquelette (maintien / transport).'],html:()=>`
+<p>Toute cellule est enveloppée d’une membrane. Sa structure est bien déterminée : on parle de <b>« mosaïque fluide »</b>. Elle est formée de <b>protéines</b> dispersées et immergées dans une <b>double couche de phospholipides</b>.</p>
+<div class="box key"><span class="eyebrow">Définition</span>Une bicouche de phospholipides dans laquelle s’intègrent différentes familles de molécules. C’est vrai pour <b>toutes</b> les membranes cellulaires.</div>
+<div class="figure"><div data-diagram="bilayer"></div><div class="figcap">Têtes <b>hydrophiles</b> (aiment l’eau) tournées vers l’extérieur et l’intérieur ; queues <b>hydrophobes</b> (fuient l’eau) cachées au centre.</div></div>
+<h3>Une membrane qui fait des replis</h3>
+<p>La membrane n’est pas tendue autour de la cellule. Elle forme des replis pour :</p>
+<ul><li>augmenter la <b>surface de contact</b> ;</li><li>augmenter les <b>échanges</b> possibles.</li></ul>
+<h3>Rôle</h3>
+<p>Assurer les <b>relations avec le monde extérieur</b> tout en présentant une <b>perméabilité sélective</b> : elle choisit ce qui entre et ce qui sort.</p>
+<div class="box"><span class="eyebrow">Le cytosquelette</span>Sur sa face intérieure, la membrane est reliée aux fibres du <b>cytosquelette</b> : un réseau de fibres protéiques qui sert au <b>maintien</b> et au <b>transport</b>.</div>`},
+cytoplasme:{keys:['Cytoplasme = tout ce qui est dans la membrane, sauf le noyau.','Cytoplasme = hyaloplasme (cytosol) + organites.','Hyaloplasme : transparent, fluide, incolore, élastique, visqueux.','Riche en eau + glucides, sels minéraux, acides aminés, O₂, CO₂.'],html:()=>`
+<p>On appelle <b>cytoplasme</b> la masse de substance comprise à l’intérieur de la membrane, <b>à l’exclusion du noyau</b>.</p>
+<div class="box key"><span class="eyebrow">À retenir</span>Cytoplasme = ensemble formé par les <b>organites cellulaires</b> et le <b>cytosol</b> (aussi appelé <b>hyaloplasme</b>).</div>
+<div class="box warn"><span class="eyebrow">Attention (p. 53)</span>La majorité des cellules sont organisées comme ça.</div>
+<h3>Composition du cytoplasme</h3>
+<div class="tbl"><table><tr><th>Hyaloplasme</th><th>Organites cellulaires</th></tr>
+<tr><td>la substance de base</td><td>mitochondries · centrosomes · lysosomes · ribosomes · réticulum endoplasmique · appareil de Golgi</td></tr></table></div>
+<h3>Le hyaloplasme</h3>
+<p>Ses 5 caractéristiques :</p>
+<div class="tags"><span class="tag">transparent</span><span class="tag">fluide</span><span class="tag">incolore</span><span class="tag">élastique</span><span class="tag">visqueux</span></div>
+<p><b>Composition :</b> riche en ${H2O} et en substances dissoutes dans l’eau : <b>glucides, sels minéraux, acides aminés (AA), ${O2}, ${CO2}</b>.</p>
+<div class="box"><span class="eyebrow">Astuce mémo</span>« Ta Fille Invite Elsa Volontiers » → Transparent, Fluide, Incolore, Élastique, Visqueux.</div>`},
+mitochondries:{keys:['Forme : corpuscule allongé, cylindrique, arrondi aux bouts, avec des crêtes.','Rôle : respiration cellulaire → « centrale énergétique ».','Glucose + 6 O₂ → 6 CO₂ + 6 H₂O + E.','L’énergie est stockée dans l’ATP : ADP + P + E ⇄ ATP.','R + E → P : endothermique ; R → P + E : exothermique.','Riches en mitochondries : cœur, muscles, reins, foie.'],html:()=>`
+<ul><li><b>Structure :</b> corpuscule allongé, plus ou moins cylindrique, arrondi aux extrémités, avec des <b>crêtes</b> internes.</li><li><b>Rôle :</b> la <b>respiration cellulaire</b>.</li></ul>
+<h3>La respiration cellulaire</h3>
+<div class="flow"><div class="fbx"><b>Entrées</b>${G} + ${O2}</div><div class="arr">→</div><div class="fbx mid"><b>Mitochondrie</b>avec crêtes internes</div><div class="arr">→</div><div class="fbx"><b>Sorties</b>${CO2} + ${H2O} + E</div></div>
+<div class="eq">${G} + 6 ${O2} → 6 ${CO2} + 6 ${H2O} + E</div>
+<div class="tbl"><table><tr><th>Réaction</th><th>Type</th></tr><tr><td>R + E → P</td><td><b>endothermique</b> (absorbe de l’énergie)</td></tr><tr><td>R → P + E</td><td><b>exothermique</b> (libère de l’énergie)</td></tr></table></div>
+<p class="muted" style="font-size:14px">La respiration libère de l’énergie : c’est une réaction exothermique.</p>
+<h3>Le cycle ADP / ATP</h3>
+<div class="figure"><div data-diagram="atp"></div><div class="figcap">ADP (adénosine diphosphate) + P + E ⇄ ATP</div></div>
+<ul><li>On qualifie la mitochondrie de <b>« centrale énergétique de la cellule »</b> car elle produit l’ATP nécessaire aux réactions cellulaires.</li><li>C’est dans l’<b>ATP</b> qu’est stockée et transportée l’énergie qui vient de la respiration.</li></ul>
+<div class="box key"><span class="eyebrow">Utilisation de l’ATP</span>On utilise de l’<b>eau</b> pour détacher un P : ATP → ADP + P + E.</div>
+<h3>Rôles des mitochondries</h3>
+<ul><li>permettre l’<b>oxydation des aliments</b> ;</li><li>siège de la <b>respiration cellulaire</b> ;</li><li><b>centrales énergétiques</b> de la cellule.</li></ul>
+<div class="box"><span class="eyebrow">Cellules riches en mitochondries</span>cœur · muscles squelettiques · reins · foie. Ce sont des organes qui consomment beaucoup d’énergie.</div>`},
+reticulum:{keys:['Feuillets très minces reliés à la membrane plasmique et à celle du noyau.','RE lisse (REL) : pas de ribosomes → synthèse des lipides.','RE rugueux (RER) : couvert de ribosomes → synthèse des protéines.','Ribosomes : assemblent les acides aminés en protéines.','Citerne : espace entre deux feuillets, réseau de circulation.'],html:()=>`
+<p>Ensemble de <b>feuillets très minces</b> formant dans le cytoplasme de nombreux replis. Ces feuillets sont en liaison avec la <b>membrane plasmique</b> et celle du <b>noyau</b>.</p>
+<div class="tbl"><table><tr><th></th><th>RE lisse (REL)</th><th>RE rugueux (RER)</th></tr>
+<tr><td><b>Ribosomes</b></td><td class="no">non</td><td class="yes">oui, sur la face externe</td></tr>
+<tr><td><b>Fabrique</b></td><td>des <b>lipides</b>, grâce aux enzymes de sa membrane</td><td>des <b>protéines</b></td></tr></table></div>
+<h3>Le RER et les ribosomes</h3>
+<ul><li>Les <b>ribosomes</b> fabriquent les protéines en <b>assemblant des acides aminés</b>.</li><li>C’est là que sont synthétisées les protéines dont la cellule est constituée, et celles qu’elle envoie vers l’extérieur.</li><li>Le RER aide les protéines à se <b>replier</b>, les <b>modifie</b> et <b>contrôle leur qualité</b>.</li></ul>
+<div class="box key"><span class="eyebrow">Vocabulaire</span>L’espace compris entre deux feuillets s’appelle une <b>citerne</b>. Les citernes forment un vaste <b>réseau de circulation</b>.</div>
+<div class="box"><span class="eyebrow">Astuce mémo</span><b>R</b>ugueux = <b>R</b>ibosomes = p<b>R</b>otéines. <b>L</b>isse = <b>L</b>ipides.</div>`},
+golgi:{keys:['Constitué d’un ou plusieurs dictyosomes.','Dictyosome = petits sacs très aplatis empilés.','Les bords forment des vésicules remplies de produits de synthèse.','Surnom : « organe d’emballage » de la cellule.','Très présent dans les cellules des glandes.'],html:()=>`
+<p>L’appareil de Golgi est constitué d’un ou plusieurs <b>dictyosomes</b>.</p>
+<div class="figure"><div data-diagram="golgi"></div><div class="figcap">Les bords se gonflent puis se détachent (bourgeonnement) en vésicules.</div></div>
+<ul><li><b>Dictyosome</b> = ensemble de petits sacs très aplatis empilés les uns sur les autres.</li><li>Les bords des dictyosomes se gonflent et se fragmentent en petites <b>vésicules</b> remplies de <b>produits de synthèse</b>.</li></ul>
+<div class="box key"><span class="eyebrow">À retenir</span>Appareil de Golgi = <b>organe d’emballage</b> de la cellule.</div>
+<h3>Où en trouve-t-on beaucoup ?</h3>
+<p>Dans les cellules des <b>glandes</b>, qui fabriquent et exportent beaucoup de produits :</p>
+<div class="tags"><span class="tag">salivaires</span><span class="tag">lacrymales</span><span class="tag">sudoripares</span><span class="tag">testicules</span><span class="tag">ovaires</span><span class="tag">pancréas</span><span class="tag">thyroïde</span><span class="tag">séminales</span><span class="tag">surrénales (adrénaline)</span></div>
+<div class="box warn"><span class="eyebrow">Ne pas confondre</span>Les <b>cellules musculaires</b>, elles, sont riches en <b>mitochondries</b>.</div>`},
+lysosomes:{keys:['Surnom : « poubelles de la cellule ».','Contiennent de nombreuses enzymes.','Décomposent les matières alimentaires et les corps étrangers.','Les enzymes viennent des ribosomes.','Forme très sphérique.'],html:()=>`
+<div class="box key"><span class="eyebrow">Surnom</span>Les <b>« poubelles de la cellule »</b>.</div>
+<ul><li>Organite situé dans le <b>cytoplasme</b>.</li><li>Contient de nombreuses <b>enzymes</b> capables de provoquer la <b>décomposition</b> des matières alimentaires et des <b>corps étrangers</b> qui ont pénétré dans la cellule.</li><li>Origine des enzymes → les <b>ribosomes</b> (les enzymes sont des protéines).</li><li>Forme <b>très sphérique</b>.</li></ul>
+<div class="figure" data-cell="animal" data-focus="lyso"></div>`},
+vegetale:{keys:['Tous les organites de la cellule animale, plus 3 en propre.','Enveloppe : résistante, non vivante, rigide, élastique.','Chloroplastes : chlorophylle → photosynthèse à la lumière.','6 CO₂ + 6 H₂O → 6 O₂ + C₆H₁₂O₆.','Vacuoles : eau + sels minéraux + glucides simples → rigidité et élasticité.'],html:()=>`
+<p>La cellule végétale a de nombreux points communs avec la cellule animale, mais elle possède des constituants qui lui sont propres.</p>
+<div class="figure" data-cell="plant"></div>
+<h3>1) L’enveloppe</h3>
+<p>La membrane de la cellule végétale est presque toujours renforcée par une enveloppe :</p>
+<div class="tags"><span class="tag">résistante</span><span class="tag">non vivante</span><span class="tag">rigide</span><span class="tag">élastique</span></div>
+<h3>2) Les chloroplastes</h3>
+<ul><li>Organites <b>aplatis</b>, remplis en couches régulières de nombreuses molécules de <b>chlorophylle</b>.</li><li>Rendue active par la <b>lumière</b>, la chlorophylle réalise une succession de réactions : la <b>photosynthèse</b>.</li></ul>
+<div class="eq">6 ${CO2} + 6 ${H2O} ⇄ 6 ${O2} + ${G}</div>
+<div class="box"><span class="eyebrow">Remarque</span>La photosynthèse, c’est la respiration « à l’envers » : les produits de l’une sont les réactifs de l’autre.</div>
+<h3>3) Les vacuoles</h3>
+<ul><li>Remplies d’un liquide : de l’<b>eau</b> dans laquelle sont dissous des <b>sels minéraux</b> et des <b>glucides simples</b>.</li><li>Les plantes leur doivent leur <b>rigidité</b> et leur <b>élasticité</b>.</li></ul>
+<div class="box plant"><span class="eyebrow">À retenir</span>La cellule végétale possède <b>tous les organites de la cellule animale</b>, plus l’enveloppe, les chloroplastes et les vacuoles.</div>
+<h3>Comparaison</h3>
+<div class="tbl"><table><tr><th>Constituant</th><th>Animale</th><th>Végétale</th></tr>
+<tr><td>Membrane, cytoplasme, noyau</td><td class="yes">oui</td><td class="yes">oui</td></tr>
+<tr><td>Mitochondries</td><td class="yes">oui</td><td class="yes">oui</td></tr>
+<tr><td>Enveloppe (paroi)</td><td class="no">non</td><td class="yes">oui</td></tr>
+<tr><td>Chloroplastes</td><td class="no">non</td><td class="yes">oui</td></tr>
+<tr><td>Grandes vacuoles</td><td class="no">non</td><td class="yes">oui</td></tr></table></div>`}
+};
+
+/* ---------- questions ---------- */
+// type: mcq (a=index) · tf (a=bool) · multi (a=[idx]) · input (a=[accepted]) · match (p=[[l,r]]) · diagram (cell, org)
+const QS=[
+// organisation
+{id:'o1',t:'organisation',d:1,type:'mcq',q:'Quelles sont les trois grandes parties de toute cellule ?',c:['Membrane, cytoplasme, noyau','Paroi, vacuole, noyau','Membrane, chloroplastes, noyau','Cytoplasme, ribosomes, ADN'],a:0,x:'Toute cellule possède une membrane, un cytoplasme et un noyau.'},
+{id:'o2',t:'organisation',d:1,type:'input',q:'Donne un autre nom de la membrane cellulaire.',a:['plasmique','membrane plasmique','cytoplasmique','membrane cytoplasmique'],x:'On dit membrane cellulaire, cytoplasmique ou plasmique.'},
+{id:'o3',t:'organisation',d:1,type:'tf',q:'Une bactérie est une cellule.',a:true,x:'Oui, la bactérie est une cellule (un être vivant fait d’une seule cellule).'},
+{id:'o4',t:'organisation',d:2,type:'tf',q:'Un virus peut se reproduire tout seul.',a:false,x:'Faux : un virus a du matériel génétique mais il a besoin d’une cellule pour se reproduire. Ce n’est pas une cellule.'},
+{id:'o5',t:'organisation',d:2,type:'mcq',q:'Pourquoi un virus n’est-il pas considéré comme une cellule ?',c:['Il ne peut pas se reproduire tout seul','Il est trop petit pour être vu','Il ne contient aucune molécule','Il vit uniquement dans l’eau'],a:0,x:'Le virus ne peut pas se reproduire seul : il doit utiliser une cellule.'},
+{id:'o6',t:'organisation',d:2,type:'tf',q:'Le noyau fait partie du cytoplasme.',a:false,x:'Faux : le cytoplasme est tout ce qui est dans la membrane, à l’exclusion du noyau.'},
+{id:'o7',t:'organisation',d:2,type:'match',q:'Associe chaque organite à son surnom.',p:[['Mitochondrie','Centrale énergétique'],['Lysosome','Poubelle de la cellule'],['Appareil de Golgi','Organe d’emballage'],['Ribosome','Fabrique les protéines']],x:'Ces surnoms sont un bon moyen de retenir les rôles.'},
+{id:'o8',t:'organisation',d:3,type:'match',q:'Associe chaque organite à son rôle.',p:[['Membrane','Perméabilité sélective'],['Mitochondrie','Respiration cellulaire'],['RE lisse','Synthèse des lipides'],['Chloroplaste','Photosynthèse']],x:'Reconnaître un organite = connaître son rôle.'},
+// membrane
+{id:'m1',t:'membrane',d:1,type:'mcq',q:'Comment appelle-t-on le modèle de structure de la membrane ?',c:['La mosaïque fluide','La double hélice','Le réseau rigide','La mosaïque solide'],a:0,x:'La membrane a une structure en « mosaïque fluide » : des protéines dispersées dans une bicouche de phospholipides.'},
+{id:'m2',t:'membrane',d:1,type:'input',q:'La membrane est formée d’une double couche de…',a:['phospholipides','phospholipide'],x:'Une bicouche de phospholipides, dans laquelle sont immergées des protéines.'},
+{id:'m3',t:'membrane',d:2,type:'mcq',q:'Dans la bicouche, les queues des phospholipides sont…',c:['hydrophobes et tournées vers le centre','hydrophiles et tournées vers l’extérieur','hydrophobes et tournées vers l’extérieur','hydrophiles et tournées vers le centre'],a:0,x:'Les têtes hydrophiles touchent l’eau (dehors et dedans), les queues hydrophobes se cachent au centre.'},
+{id:'m4',t:'membrane',d:2,type:'multi',q:'Pourquoi la membrane forme-t-elle des replis ?',c:['Augmenter la surface de contact','Augmenter les échanges possibles','Rendre la cellule rigide','Stocker de l’énergie'],a:[0,1],x:'Les replis augmentent la surface de contact et donc les échanges.'},
+{id:'m5',t:'membrane',d:2,type:'input',q:'La membrane laisse passer certaines substances et pas d’autres : sa perméabilité est…',a:['selective'],x:'Perméabilité sélective : la membrane choisit ce qui entre et sort.'},
+{id:'m6',t:'membrane',d:2,type:'mcq',q:'Sur sa face intérieure, la membrane est reliée…',c:['aux fibres du cytosquelette','à l’enveloppe végétale','directement au noyau','aux vacuoles'],a:0,x:'La membrane est reliée au cytosquelette, un réseau de fibres protéiques.'},
+{id:'m7',t:'membrane',d:3,type:'mcq',q:'Quel est le rôle du cytosquelette ?',c:['Maintien et transport','Synthèse des protéines','Respiration cellulaire','Digestion des déchets'],a:0,x:'Réseau de fibres protéiques : maintien de la forme et transport.'},
+{id:'m8',t:'membrane',d:1,type:'tf',q:'La membrane est tendue autour de la cellule comme un ballon.',a:false,x:'Faux : elle forme des replis pour augmenter la surface de contact.'},
+{id:'m9',t:'membrane',d:3,type:'tf',q:'Toutes les membranes cellulaires ont une structure de bicouche de phospholipides.',a:true,x:'Vrai, d’après la définition : une bicouche de phospholipides dans laquelle s’intègrent différentes molécules, pour toutes les membranes cellulaires.'},
+{id:'m10',t:'membrane',d:3,type:'mcq',q:'Où se trouvent les protéines de la membrane ?',c:['Dispersées et immergées dans la bicouche','Uniquement posées sur la face extérieure','En une couche continue sous les lipides','Il n’y en a pas'],a:0,x:'Les protéines sont dispersées et immergées dans la double couche de phospholipides.'},
+{id:'m11',t:'membrane',d:2,type:'mcq',q:'Quel est le rôle principal de la membrane ?',c:['Assurer les relations avec l’extérieur avec une perméabilité sélective','Produire l’énergie de la cellule','Fabriquer les lipides','Emballer les produits de synthèse'],a:0,x:'Rôle : relations avec le monde extérieur, perméabilité sélective.'},
+// cytoplasme
+{id:'c1',t:'cytoplasme',d:1,type:'mcq',q:'Qu’est-ce que le cytoplasme ?',c:['La substance dans la membrane, sans le noyau','Tout ce qui est dans la membrane, noyau compris','Le liquide à l’intérieur du noyau','La membrane et le noyau ensemble'],a:0,x:'Le cytoplasme est la masse comprise dans la membrane, à l’exclusion du noyau.'},
+{id:'c2',t:'cytoplasme',d:1,type:'input',q:'Comment s’appelle la substance de base du cytoplasme (aussi appelée cytosol) ?',a:['hyaloplasme'],x:'Le hyaloplasme = cytosol, la substance de base.'},
+{id:'c3',t:'cytoplasme',d:2,type:'multi',q:'Coche les caractéristiques du hyaloplasme.',c:['Transparent','Rigide','Visqueux','Coloré','Élastique','Fluide'],a:[0,2,4,5],x:'Transparent, fluide, incolore, élastique, visqueux.'},
+{id:'c4',t:'cytoplasme',d:2,type:'multi',q:'Qu’est-ce qui est dissous dans l’eau du hyaloplasme ?',c:['Glucides','Chlorophylle','Sels minéraux',`${O2} et ${CO2}`,'Acides aminés'],a:[0,2,3,4],x:'Glucides, sels minéraux, acides aminés, O₂ et CO₂. La chlorophylle est dans les chloroplastes.'},
+{id:'c5',t:'cytoplasme',d:1,type:'mcq',q:'Le hyaloplasme est surtout riche en…',c:['eau','lipides','ATP','chlorophylle'],a:0,x:'Il est riche en H₂O et en substances dissoutes dans l’eau.'},
+{id:'c6',t:'cytoplasme',d:3,type:'mcq',q:'Complète : cytoplasme = …',c:['hyaloplasme + organites','hyaloplasme + noyau','organites + noyau','membrane + hyaloplasme'],a:0,x:'Cytoplasme = organites cellulaires + cytosol (hyaloplasme).'},
+{id:'c7',t:'cytoplasme',d:2,type:'multi',q:'Lesquels sont des organites cellulaires cités dans le cours ?',c:['Centrosomes','Hyaloplasme','Lysosomes','Membrane plasmique','Appareil de Golgi','Ribosomes'],a:[0,2,4,5],x:'Organites : mitochondries, centrosomes, lysosomes, ribosomes, réticulum endoplasmique, appareil de Golgi.'},
+{id:'c8',t:'cytoplasme',d:1,type:'tf',q:'Le hyaloplasme est incolore.',a:true,x:'Vrai : transparent, fluide, incolore, élastique, visqueux.'},
+{id:'c9',t:'cytoplasme',d:3,type:'tf',q:'Le hyaloplasme est un organite.',a:false,x:'Faux : c’est la substance de base dans laquelle baignent les organites.'},
+// mitochondries
+{id:'mi1',t:'mitochondries',d:1,type:'mcq',q:'Quel est le rôle des mitochondries ?',c:['La respiration cellulaire','La photosynthèse','La synthèse des lipides','L’emballage des produits'],a:0,x:'La mitochondrie est le siège de la respiration cellulaire.'},
+{id:'mi2',t:'mitochondries',d:1,type:'mcq',q:'Quel est le surnom de la mitochondrie ?',c:['La centrale énergétique','La poubelle de la cellule','L’organe d’emballage','L’usine à lipides'],a:0,x:'Elle produit l’ATP : c’est la centrale énergétique de la cellule.'},
+{id:'mi3',t:'mitochondries',d:2,type:'mcq',q:'Quelle est l’équation de la respiration cellulaire ?',c:[`${G} + 6 ${O2} → 6 ${CO2} + 6 ${H2O} + E`,`6 ${CO2} + 6 ${H2O} → 6 ${O2} + ${G}`,`${G} + ${CO2} → ${O2} + ${H2O} + E`,`${G} + 6 ${H2O} → 6 ${O2} + E`],a:0,x:'Glucose + oxygène → dioxyde de carbone + eau + énergie.'},
+{id:'mi4',t:'mitochondries',d:2,type:'input',q:'Quelle molécule stocke et transporte l’énergie de la respiration ? (en 3 lettres)',a:['atp','adenosine triphosphate'],x:'L’ATP stocke et transporte l’énergie.'},
+{id:'mi5',t:'mitochondries',d:2,type:'input',q:'Que signifie ADP ?',a:['adenosine diphosphate','adenosine di phosphate'],x:'ADP = adénosine diphosphate.'},
+{id:'mi6',t:'mitochondries',d:2,type:'mcq',q:'ADP + P + E → ?',c:['ATP','ADN','CO<sub>2</sub>','Glucose'],a:0,x:'ADP + P + E ⇄ ATP.'},
+{id:'mi7',t:'mitochondries',d:3,type:'mcq',q:'Comment la cellule récupère-t-elle l’énergie de l’ATP ?',c:['Elle utilise de l’eau pour détacher un P','Elle ajoute un P à l’ATP','Elle brûle l’ATP avec de l’O<sub>2</sub>','Elle transforme l’ATP en glucose'],a:0,x:'On utilise de l’eau pour détacher un P : ATP → ADP + P + E.'},
+{id:'mi8',t:'mitochondries',d:2,type:'multi',q:'Quelles cellules sont riches en mitochondries ?',c:['Cœur','Ongles','Foie','Reins','Muscles squelettiques'],a:[0,2,3,4],x:'Cœur, muscles squelettiques, reins, foie : ils consomment beaucoup d’énergie.'},
+{id:'mi9',t:'mitochondries',d:1,type:'mcq',q:'Quelle est la forme d’une mitochondrie ?',c:['Corpuscule allongé, arrondi aux extrémités','Sphère parfaite remplie d’enzymes','Sacs aplatis empilés','Feuillets très minces'],a:0,x:'Corpuscule allongé, plus ou moins cylindrique, arrondi aux extrémités.'},
+{id:'mi10',t:'mitochondries',d:2,type:'tf',q:'La mitochondrie possède des crêtes internes.',a:true,x:'Vrai : les crêtes sont visibles sur le schéma.'},
+{id:'mi11',t:'mitochondries',d:3,type:'multi',q:'Coche les rôles des mitochondries.',c:['Oxydation des aliments','Siège de la respiration cellulaire','Centrale énergétique','Synthèse des lipides'],a:[0,1,2],x:'La synthèse des lipides, c’est le RE lisse.'},
+{id:'mi12',t:'mitochondries',d:2,type:'mcq',q:'Quels sont les produits de la respiration cellulaire ?',c:[`${CO2} + ${H2O} + énergie`,`Glucose + ${O2}`,`${O2} + ${H2O}`,`${CO2} + glucose`],a:0,x:'Sorties : CO₂, H₂O et énergie.'},
+{id:'e1',t:'mitochondries',d:2,type:'mcq',q:'Une réaction R + E → P est…',c:['endothermique','exothermique','neutre','impossible'],a:0,x:'Elle absorbe de l’énergie : endothermique.'},
+{id:'e2',t:'mitochondries',d:2,type:'mcq',q:'La respiration cellulaire libère de l’énergie. C’est donc une réaction…',c:['exothermique','endothermique','photosynthétique','neutre'],a:0,x:'R → P + E : exothermique.'},
+{id:'e3',t:'mitochondries',d:3,type:'match',q:'Associe chaque réaction à ce qu’elle représente.',p:[['R + E → P','Endothermique'],['R → P + E','Exothermique'],['ADP + P + E → ATP','Stockage de l’énergie'],['ATP → ADP + P + E','Libération de l’énergie']],x:'Endo = l’énergie entre ; exo = l’énergie sort.'},
+{id:'e4',t:'mitochondries',d:3,type:'input',q:'Combien de molécules d’O₂ faut-il pour respirer une molécule de glucose ? (un nombre)',a:['6','six'],x:'C₆H₁₂O₆ + 6 O₂ → 6 CO₂ + 6 H₂O + E.'},
+// reticulum
+{id:'r1',t:'reticulum',d:1,type:'mcq',q:'Le RE lisse sert à la synthèse…',c:['des lipides','des protéines','de l’ATP','de la chlorophylle'],a:0,x:'RE lisse → lipides.'},
+{id:'r2',t:'reticulum',d:1,type:'mcq',q:'Pourquoi dit-on que le RE est « rugueux » ?',c:['Sa face externe est parsemée de ribosomes','Il forme beaucoup de replis','Il contient de la chlorophylle','Il est rigide'],a:0,x:'Les ribosomes sur sa face externe lui donnent un aspect rugueux.'},
+{id:'r3',t:'reticulum',d:2,type:'mcq',q:'Quel est le rôle des ribosomes ?',c:['Assembler des acides aminés en protéines','Fabriquer des lipides','Décomposer les corps étrangers','Produire l’énergie'],a:0,x:'Les ribosomes synthétisent les protéines à partir d’acides aminés.'},
+{id:'r4',t:'reticulum',d:2,type:'input',q:'Comment appelle-t-on l’espace compris entre deux feuillets du RE ?',a:['citerne','citernes'],x:'Les citernes forment un vaste réseau de circulation.'},
+{id:'r5',t:'reticulum',d:2,type:'tf',q:'Les feuillets du RE sont reliés à la membrane plasmique et à celle du noyau.',a:true,x:'Vrai.'},
+{id:'r6',t:'reticulum',d:3,type:'multi',q:'Que fait le RER ?',c:['Fabrique des protéines grâce aux ribosomes','Aide les protéines à se replier','Modifie les protéines et contrôle leur qualité','Fabrique des lipides'],a:[0,1,2],x:'Les lipides, c’est le REL.'},
+{id:'r7',t:'reticulum',d:2,type:'tf',q:'Le REL porte des ribosomes.',a:false,x:'Faux : le REL (lisse) n’a pas de ribosomes.'},
+{id:'r8',t:'reticulum',d:3,type:'mcq',q:'Grâce à quoi le REL fabrique-t-il des lipides ?',c:['Aux enzymes présentes dans sa membrane','Aux ribosomes','À la chlorophylle','À l’ATP du noyau'],a:0,x:'Le REL fabrique des lipides grâce aux enzymes de sa membrane.'},
+{id:'r9',t:'reticulum',d:2,type:'match',q:'Associe chaque élément à ce qui le caractérise.',p:[['RE lisse','Lipides'],['RE rugueux','Protéines'],['Citernes','Réseau de circulation'],['Ribosomes','Assemblent les acides aminés']],x:'Rugueux = ribosomes = protéines ; lisse = lipides.'},
+{id:'r10',t:'reticulum',d:3,type:'mcq',q:'Les protéines fabriquées sur le RER servent…',c:['à constituer la cellule et à être envoyées à l’extérieur','seulement à être envoyées à l’extérieur','seulement à constituer le noyau','à fabriquer les lipides'],a:0,x:'Ce sont les protéines dont la cellule est constituée et celles qu’elle envoie vers l’extérieur.'},
+// golgi
+{id:'g1',t:'golgi',d:1,type:'mcq',q:'Quel est le surnom de l’appareil de Golgi ?',c:['L’organe d’emballage','La centrale énergétique','La poubelle','L’usine à protéines'],a:0,x:'Appareil de Golgi = organe d’emballage de la cellule.'},
+{id:'g2',t:'golgi',d:1,type:'input',q:'L’appareil de Golgi est formé d’un ou plusieurs…',a:['dictyosomes','dictyosome'],x:'Un ou plusieurs dictyosomes.'},
+{id:'g3',t:'golgi',d:2,type:'mcq',q:'Qu’est-ce qu’un dictyosome ?',c:['Des petits sacs très aplatis empilés','Des feuillets couverts de ribosomes','Une sphère pleine d’enzymes','Un corpuscule avec des crêtes'],a:0,x:'Dictyosome = petits sacs très aplatis empilés les uns sur les autres.'},
+{id:'g4',t:'golgi',d:2,type:'mcq',q:'Que se passe-t-il au bord des dictyosomes ?',c:['Ils se gonflent et forment des vésicules','Ils fabriquent de l’ATP','Ils captent la lumière','Ils digèrent les corps étrangers'],a:0,x:'Les bords se gonflent et se fragmentent en vésicules remplies de produits de synthèse.'},
+{id:'g5',t:'golgi',d:3,type:'multi',q:'Dans quelles cellules l’appareil de Golgi est-il très développé ?',c:['Glandes salivaires','Pancréas','Cellules musculaires','Glandes sudoripares','Thyroïde'],a:[0,1,3,4],x:'Les cellules des glandes. Les cellules musculaires, elles, sont riches en mitochondries.'},
+{id:'g6',t:'golgi',d:2,type:'mcq',q:'Les cellules musculaires sont surtout riches en…',c:['mitochondries','appareils de Golgi','chloroplastes','vacuoles'],a:0,x:'Les muscles consomment beaucoup d’énergie : beaucoup de mitochondries.'},
+{id:'g7',t:'golgi',d:2,type:'tf',q:'Les vésicules du Golgi sont remplies de produits de synthèse.',a:true,x:'Vrai : elles emballent ce que la cellule fabrique.'},
+{id:'g8',t:'golgi',d:3,type:'mcq',q:'Pourquoi les cellules du pancréas ou des glandes salivaires ont-elles beaucoup de Golgi ?',c:['Elles fabriquent et exportent beaucoup de produits','Elles consomment beaucoup d’énergie','Elles réalisent la photosynthèse','Elles stockent beaucoup d’eau'],a:0,x:'Les glandes sécrètent beaucoup : il faut beaucoup d’« emballage ».'},
+// lysosomes
+{id:'l1',t:'lysosomes',d:1,type:'mcq',q:'Quel est le surnom des lysosomes ?',c:['Les poubelles de la cellule','Les centrales énergétiques','Les organes d’emballage','Les réservoirs d’eau'],a:0,x:'Les lysosomes sont les « poubelles de la cellule ».'},
+{id:'l2',t:'lysosomes',d:2,type:'mcq',q:'Que contiennent les lysosomes ?',c:['De nombreuses enzymes','De la chlorophylle','De l’ATP en réserve','Le matériel génétique'],a:0,x:'Des enzymes capables de décomposer aliments et corps étrangers.'},
+{id:'l3',t:'lysosomes',d:1,type:'mcq',q:'Quelle est la forme des lysosomes ?',c:['Très sphérique','Allongée avec des crêtes','Sacs aplatis empilés','Feuillets minces'],a:0,x:'Forme très sphérique.'},
+{id:'l4',t:'lysosomes',d:2,type:'multi',q:'Que décomposent les enzymes des lysosomes ?',c:['Les matières alimentaires','Les corps étrangers entrés dans la cellule','La membrane plasmique','La lumière'],a:[0,1],x:'Matières alimentaires et corps étrangers ayant pénétré dans la cellule.'},
+{id:'l5',t:'lysosomes',d:3,type:'mcq',q:'D’où viennent les enzymes des lysosomes ?',c:['Des ribosomes','Des mitochondries','Des chloroplastes','Des vacuoles'],a:0,x:'Les enzymes sont des protéines, fabriquées par les ribosomes.'},
+{id:'l6',t:'lysosomes',d:2,type:'tf',q:'Les lysosomes se trouvent dans le noyau.',a:false,x:'Faux : ils sont dans le cytoplasme.'},
+// vegetale
+{id:'v1',t:'vegetale',d:1,type:'multi',q:'Quels constituants sont propres à la cellule végétale ?',c:['Enveloppe','Chloroplastes','Vacuoles','Mitochondries','Noyau'],a:[0,1,2],x:'Mitochondries et noyau existent aussi dans la cellule animale.'},
+{id:'v2',t:'vegetale',d:2,type:'multi',q:'Coche les caractéristiques de l’enveloppe végétale.',c:['Résistante','Non vivante','Rigide','Fluide','Élastique','Vivante'],a:[0,1,2,4],x:'Résistante, non vivante, rigide, élastique.'},
+{id:'v3',t:'vegetale',d:2,type:'tf',q:'L’enveloppe de la cellule végétale est vivante.',a:false,x:'Faux : elle est non vivante.'},
+{id:'v4',t:'vegetale',d:1,type:'mcq',q:'Dans quel organite se fait la photosynthèse ?',c:['Le chloroplaste','La mitochondrie','La vacuole','Le lysosome'],a:0,x:'Le chloroplaste contient la chlorophylle.'},
+{id:'v5',t:'vegetale',d:2,type:'input',q:'Quelle molécule remplit les chloroplastes ?',a:['chlorophylle'],x:'La chlorophylle, rendue active par la lumière.'},
+{id:'v6',t:'vegetale',d:2,type:'mcq',q:'Quelle est l’équation de la photosynthèse ?',c:[`6 ${CO2} + 6 ${H2O} → 6 ${O2} + ${G}`,`${G} + 6 ${O2} → 6 ${CO2} + 6 ${H2O}`,`6 ${O2} + 6 ${H2O} → 6 ${CO2} + ${G}`,`${CO2} + ${O2} → ${G}`],a:0,x:'CO₂ + eau → O₂ + glucose, grâce à la lumière.'},
+{id:'v7',t:'vegetale',d:2,type:'mcq',q:'Que faut-il pour que la chlorophylle soit active ?',c:['De la lumière','De l’obscurité','De l’ATP','Des lysosomes'],a:0,x:'La chlorophylle est rendue active par la lumière.'},
+{id:'v8',t:'vegetale',d:2,type:'mcq',q:'De quoi sont remplies les vacuoles ?',c:['D’eau avec des sels minéraux et des glucides simples','D’enzymes digestives','De chlorophylle','De lipides'],a:0,x:'Eau + sels minéraux + glucides simples dissous.'},
+{id:'v9',t:'vegetale',d:2,type:'mcq',q:'Que doivent les plantes à leurs vacuoles ?',c:['Leur rigidité et leur élasticité','Leur couleur verte','Leur énergie','Leur respiration'],a:0,x:'Les vacuoles donnent rigidité et élasticité.'},
+{id:'v10',t:'vegetale',d:1,type:'tf',q:'La cellule végétale possède aussi des mitochondries.',a:true,x:'Vrai : elle a tous les organites de la cellule animale, plus les siens.'},
+{id:'v11',t:'vegetale',d:3,type:'mcq',q:'Quel lien existe entre respiration et photosynthèse ?',c:['Les produits de l’une sont les réactifs de l’autre','Elles ont exactement les mêmes produits','Elles se font toutes les deux dans le chloroplaste','Elles produisent toutes deux de l’O<sub>2</sub>'],a:0,x:'Respiration : glucose + O₂ → CO₂ + H₂O. Photosynthèse : l’inverse.'},
+{id:'v12',t:'vegetale',d:3,type:'tf',q:'Une cellule végétale fait la photosynthèse mais pas la respiration.',a:false,x:'Faux : elle a des mitochondries, donc elle respire aussi.'},
+{id:'v13',t:'vegetale',d:1,type:'mcq',q:'Quelle est la forme des chloroplastes ?',c:['Organites aplatis','Sphères','Feuillets reliés au noyau','Sacs empilés'],a:0,x:'Les chloroplastes sont des organites aplatis.'},
+{id:'v14',t:'vegetale',d:2,type:'match',q:'Associe chaque constituant à son rôle.',p:[['Chloroplaste','Photosynthèse'],['Vacuole','Rigidité de la plante'],['Enveloppe','Renforce la membrane'],['Mitochondrie','Respiration']],x:'Les trois premiers sont propres à la cellule végétale.'}
+];
+// questions générées : reconnaître un organite sur le schéma
+(()=>{const dd={membrane:1,noyau:1,mito:2,rer:2,rel:3,golgi:2,lyso:2,centro:3,paroi:2,vacuole:2,chloro:1};
+ for(const cell of ['animal','plant']) for(const o of CELL_ORGS[cell]){
+  QS.push({id:`dg-${cell}-${o}`,t:ORG[o].t,d:dd[o],type:'diagram',cell,org:o,q:`Quel élément est mis en évidence sur cette cellule ${cell==='animal'?'animale':'végétale'} ?`,x:`${ORG[o].name} : ${ORG[o].role}`});
+ }})();
+const QMAP=Object.fromEntries(QS.map(q=>[q.id,q]));
+
+const FC=[
+ ['organisation','Les 3 parties de toute cellule','Membrane, cytoplasme, noyau'],
+ ['organisation','Bactérie : cellule ou pas ?','Oui, c’est une cellule'],
+ ['organisation','Virus : pourquoi pas une cellule ?','Il ne peut pas se reproduire tout seul'],
+ ['membrane','Structure de la membrane','Mosaïque fluide : bicouche de phospholipides + protéines dispersées'],
+ ['membrane','Pourquoi la membrane fait des replis ?','Augmenter la surface de contact et les échanges'],
+ ['membrane','Rôle de la membrane','Relations avec l’extérieur, perméabilité sélective'],
+ ['membrane','Cytosquelette','Réseau de fibres protéiques : maintien et transport'],
+ ['cytoplasme','Cytoplasme','Hyaloplasme + organites (sans le noyau)'],
+ ['cytoplasme','5 caractéristiques du hyaloplasme','Transparent, fluide, incolore, élastique, visqueux'],
+ ['cytoplasme','Composition du hyaloplasme','Eau + glucides, sels minéraux, acides aminés, O₂, CO₂'],
+ ['mitochondries','Rôle de la mitochondrie','Respiration cellulaire (centrale énergétique)'],
+ ['mitochondries','Équation de la respiration','C₆H₁₂O₆ + 6 O₂ → 6 CO₂ + 6 H₂O + E'],
+ ['mitochondries','ADP + P + E ⇄ ?','ATP (stocke et transporte l’énergie)'],
+ ['mitochondries','Endothermique / exothermique','R + E → P : endo · R → P + E : exo'],
+ ['mitochondries','Cellules riches en mitochondries','Cœur, muscles squelettiques, reins, foie'],
+ ['reticulum','RE lisse','Pas de ribosomes → synthèse des lipides'],
+ ['reticulum','RE rugueux','Ribosomes → synthèse des protéines'],
+ ['reticulum','Citerne','Espace entre deux feuillets du RE (réseau de circulation)'],
+ ['golgi','Appareil de Golgi','Organe d’emballage, fait de dictyosomes'],
+ ['golgi','Dictyosome','Petits sacs aplatis empilés qui forment des vésicules'],
+ ['golgi','Cellules riches en Golgi','Cellules des glandes (salivaires, pancréas, thyroïde…)'],
+ ['lysosomes','Lysosomes','« Poubelles » : enzymes qui décomposent aliments et corps étrangers'],
+ ['vegetale','Les 3 constituants propres au végétal','Enveloppe, chloroplastes, vacuoles'],
+ ['vegetale','Enveloppe végétale','Résistante, non vivante, rigide, élastique'],
+ ['vegetale','Équation de la photosynthèse','6 CO₂ + 6 H₂O → 6 O₂ + C₆H₁₂O₆ (lumière)'],
+ ['vegetale','Rôle des vacuoles','Rigidité et élasticité de la plante']
+].map(([t,f,b],i)=>({id:'f'+i,t,d:2,f,b}));
+
+/* ---------- state ---------- */
+const KEY='revise-cellule-v1';
+let memo=null;
+function fresh(){return {q:{},r:{},n:{},xp:0,streak:0,best:0,lastDay:null,read:{},hist:[],days:{},len:10,tot:0,ok:0,chests:[],col:{},themes:['rose'],theme:'rose',shield:0,sm:{},dq:null,rem:{on:false,time:'18:00',last:null},exam:null};}
+function load(){try{const s=localStorage.getItem(KEY);if(s)return JSON.parse(s);}catch(e){}return memo;}
+let S=Object.assign(fresh(),load()||{});
+function save(quiet){if(!quiet)S.ts=Date.now();memo=S;try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}if(!quiet)queueCloud();}
+/* cloud save: progression kept in the viewer's Claude account */
+var cloud=null,cloudT=null,cloudBusy=false,cloudAgain=false,cloudReady=false,syncState='wait';
+const SYNC={wait:'Connexion à ta sauvegarde…',ok:'Progression sauvegardée dans ton compte Claude : tu la retrouves à chaque ouverture, sur tous tes appareils.',local:'Progression enregistrée sur cet appareil. Ouvre toujours l’app avec le même navigateur (ou depuis l’icône sur ton écran d’accueil).',slow:'La sauvegarde en ligne ne répond pas encore… on réessaie.',err:'Impossible de sauvegarder en ligne pour l’instant. Ta progression est gardée sur cet appareil et sera envoyée dès que possible.'};
+function setSync(st){syncState=st;const el=document.getElementById('sync');if(el){el.textContent=SYNC[st];el.className='sync '+st;}}
+function queueCloud(){if(!cloud||!cloudReady)return;clearTimeout(cloudT);cloudT=setTimeout(pushCloud,1200);}
+async function pushCloud(){if(!cloud)return;if(cloudBusy){cloudAgain=true;return;}cloudBusy=true;
+ try{await cloud.set({state:JSON.stringify(S),ts:S.ts||Date.now(),v:1});setSync('ok');}
+ catch(e){setSync(e&&e.code==='invalid_argument'?'local':'err');if(e&&e.code==='unavailable')setTimeout(queueCloud,4000);}
+ cloudBusy=false;if(cloudAgain){cloudAgain=false;pushCloud();}}
+function isEmpty(x){return !x||(!x.tot&&!x.xp&&!Object.keys(x.read||{}).length&&!(x.chests||[]).length);}
+async function initCloud(){
+ try{if(!window.claude||typeof claude.use!=='function'){setSync('local');return;}
+  const [db,user]=await Promise.all([claude.use('db'),claude.use('user')]);
+  if(!db||!user){setSync('local');return;}
+  const id=await user.id();if(!id){setSync('local');return;}
+  cloud=db.doc('data/users/'+id+'/progress');
+  const timer=setTimeout(()=>setSync('slow'),10000);
+  let snap;try{snap=await cloud.get();}catch(e){try{await new Promise(r=>setTimeout(r,800+Math.random()*800));snap=await cloud.get();}catch(e2){clearTimeout(timer);cloudReady=true;setSync('err');return;}}
+  clearTimeout(timer);
+  let r=null;if(snap.exists){try{r=JSON.parse(snap.data().state);}catch(e){}}
+  cloudReady=true;
+  if(r&&(isEmpty(S)||(r.ts||0)>=(S.ts||0))){
+   S=Object.assign(fresh(),r);memo=S;try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}
+   applyTheme();if(!sess)render();else renderChrome();setSync('ok');
+   if(!isEmpty(r))toast('Progression récupérée');}
+  else if(!isEmpty(S))pushCloud();
+  else setSync('ok');
+ }catch(e){setSync('err');}
+}
+const dayKey=(d=new Date())=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+function touchDay(){const t=dayKey();if(S.lastDay===t)return;const y=new Date();y.setDate(y.getDate()-1);const y2=new Date();y2.setDate(y2.getDate()-2);
+ if(S.lastDay===dayKey(y))S.streak++;else if(S.lastDay===dayKey(y2)&&S.shield>0){S.shield--;S.streak++;toast('Bouclier utilisé : ta série est sauvée !');}else S.streak=1;
+ S.best=Math.max(S.best,S.streak);S.lastDay=t;
+ [3,7,14,30].forEach(n=>{if(S.streak>=n&&!S.sm[n]){S.sm[n]=1;giveChest(n>=7?'or':'argent',`Série de ${n} jours`);}});}
+function liveStreak(){if(!S.lastDay)return 0;const y=new Date();y.setDate(y.getDate()-1);const y2=new Date();y2.setDate(y2.getDate()-2);return (S.lastDay===dayKey()||S.lastDay===dayKey(y)||(S.shield>0&&S.lastDay===dayKey(y2)))?S.streak:0;}
+
+/* ---------- adaptive engine ---------- */
+const DV={1:-0.6,2:0.6,3:1.7};
+const INT=[0,10*60e3,864e5,3*864e5,7*864e5,16*864e5];
+const rating=t=>S.r[t]??0;
+function mastery(t,r=S.r,n=S.n){if(!n[t])return 0;return Math.round(100*sig(((r[t]??0)-0.9)*1.5));}
+function target(t){const r=rating(t);return r<0.2?1:r<1.3?2:3;}
+function level(m,n){if(!n)return['À découvrir','p-new'];if(m<40)return['Fragile','p-weak'];if(m<75)return['En progrès','p-mid'];return['Maîtrisé','p-ok'];}
+function globalMastery(){return Math.round(TOPICS.reduce((s,t)=>s+mastery(t.id),0)/TOPICS.length);}
+function record(q,score){
+ const t=q.t,r=rating(t),p=sig(r-DV[q.d]);
+ S.r[t]=Math.max(-2,Math.min(4,r+0.55*(score-p)));
+ S.n[t]=(S.n[t]||0)+1;
+ const st=S.q[q.id]||(S.q[q.id]={b:0,c:0,w:0,due:0});
+ if(score>=0.999){st.c++;st.b=Math.min(5,st.b+1);}
+ else if(score>=0.5){st.w++;st.b=Math.max(1,st.b);}
+ else{st.w++;st.b=1;}
+ st.due=Date.now()+(score>=0.999?INT[st.b]:INT[1]);
+ const k=dayKey();S.days[k]=(S.days[k]||0)+1;S.tot++;if(score>=0.999)S.ok++;
+ const L0=lvlInfo().L;S.xp+=score>=0.999?10:3;touchDay();save();checkMissions();if(lvlInfo().L>L0)toast(`Niveau ${lvlInfo().L} atteint !`);
+}
+function weakest(n=3){return TOPICS.map(t=>({...t,m:mastery(t.id),c:S.n[t.id]||0})).filter(t=>t.c>0).sort((a,b)=>a.m-b.m).slice(0,n);}
+function errorsPool(){return QS.filter(q=>{const s=S.q[q.id];return s&&s.w>0&&(s.b<3||s.w>=s.c);});}
+function duePool(){const now=Date.now();return QS.filter(q=>S.q[q.id]&&S.q[q.id].due<=now);}
+
+let sess=null;
+function pick(){
+ const ri=sess.requeue.findIndex(x=>x.at<=sess.log.length);
+ if(ri>=0){const r=sess.requeue.splice(ri,1)[0];return{q:QMAP[r.id],again:true};}
+ const pool=sess.pool.filter(q=>!sess.used.has(q.id));
+ if(!pool.length){if(sess.requeue.length){const r=sess.requeue.shift();return{q:QMAP[r.id],again:true};}return null;}
+ const now=Date.now(),last=sess.log.slice(-2).map(l=>QMAP[l.id]);
+ let best=null,bs=-1e9;
+ for(const q of pool){const st=S.q[q.id];let s=0;
+  s+=2-1.3*Math.abs(q.d-target(q.t));
+  s+=(1-mastery(q.t)/100)*2.2;
+  if(!st)s+=0.8;else if(st.due<=now)s+=1.8+(st.w>st.c?1:0);else s-=2.2;
+  if(last.length&&last[last.length-1].t===q.t)s-=1.2;
+  if(last.length===2&&last.every(x=>x.t===q.t))s-=1.5;
+  if(last.length&&last[last.length-1].type===q.type)s-=0.6;
+  s+=Math.random()*1.3;
+  if(s>bs){bs=s;best=q;}}
+ return{q:best};
+}
+function buildExam(){let list=[];for(const t of TOPICS){const qs=shuffle(QS.filter(q=>q.t===t.id));
+ const a=qs.find(q=>q.d<=2),b=qs.find(q=>q.d>=2&&q!==a);list.push(a,b);}return shuffle(list.filter(Boolean));}
+
+/* ---------- views ---------- */
+let route='accueil';
+function go(h){location.hash=h;}
+function render(){
+ const h=(location.hash||'#accueil').slice(1);route=h;
+ const v=$('#view');
+ if(h.startsWith('cours-')&&SECTIONS[h.slice(6)])v.innerHTML=viewSection(h.slice(6));
+ else if(h==='cours')v.innerHTML=viewCours();
+ else if(h==='exos')v.innerHTML=viewExos();
+ else if(h==='progres')v.innerHTML=viewProgres();
+ else if(h==='coffres')v.innerHTML=viewCoffres();
+ else{route='accueil';v.innerHTML=viewHome();}
+ renderChrome();hydrate(v);bind(v);
+ window.scrollTo(0,0);
+}
+function renderChrome(){
+ const s=liveStreak();
+ $('#streak').innerHTML=`${ic('flame')}${s} j`;
+ const tab=route.startsWith('cours')?'cours':route;
+ $('#tabs').innerHTML=[['accueil','home','Accueil'],['cours','book','Cours'],['exos','target','Exercices'],['coffres','chest','Coffres'],['progres','chart','Progrès']]
+  .map(([h,i,l])=>`<a class="tab ${tab===h?'on':''}" href="#${h}" ${tab===h?'aria-current="page"':''}>${ic(i)}<span>${l}</span>${h==='coffres'&&S.chests.length?`<span class="badge" aria-label="${S.chests.length} à ouvrir">${S.chests.length}</span>`:''}</a>`).join('');
+ const bl=$('#bell');bl.innerHTML=ic('bell');bl.classList.toggle('on',!!S.rem.on);
+}
+function ring(pct,size=104,stroke=10,col='var(--accent)'){const r=(size-stroke)/2,c=2*Math.PI*r;
+ return `<svg viewBox="0 0 ${size} ${size}"><circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="var(--surface-2)" stroke-width="${stroke}"/><circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="${col}" stroke-width="${stroke}" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c*(1-Math.min(1,pct/100))}"/></svg>`;}
+function lvlInfo(){let L=1,need=100,x=S.xp;while(x>=need){x-=need;L++;need=100+50*(L-1);}return {L,x,need};}
+function stars(m,n){return !n?0:m>=90?3:m>=75?2:m>=40?1:0;}
+function bossSVG(hp){
+ return `<svg viewBox="0 0 240 200" class="boss" aria-hidden="true"><ellipse class="shadow" cx="120" cy="190" rx="72" ry="8" fill="rgba(0,0,0,.35)"/>
+ <g class="bob">
+  <path d="M50 118Q18 112 16 84" stroke="#E2407A" stroke-width="16" stroke-linecap="round" fill="none"/><path d="M190 120Q224 108 222 78" stroke="#E2407A" stroke-width="16" stroke-linecap="round" fill="none"/>
+  <circle cx="16" cy="80" r="11" fill="#FF6FA0" stroke="#FFD1E1" stroke-width="3"/><circle cx="222" cy="74" r="11" fill="#FF6FA0" stroke="#FFD1E1" stroke-width="3"/>
+  <path d="M40 110C20 80 50 40 90 38C120 20 170 28 192 60C216 92 210 140 180 162C150 186 90 184 62 166C42 152 50 132 40 110Z" fill="#FF5A91" stroke="#FFD1E1" stroke-width="5"/>
+  <path d="M58 112C46 88 66 56 96 54C122 40 164 48 178 72C196 98 190 134 168 150C144 168 98 166 76 154C60 144 64 128 58 112Z" fill="#FF7FAA" opacity=".55"/>
+  <g transform="translate(66 140) rotate(-30)"><ellipse rx="13" ry="6" fill="#FFB36B" stroke="#C25E12" stroke-width="2"/><polyline points="-9,0 -6,-3 -3,3 0,-3 3,3 6,-3 9,0" fill="none" stroke="#C25E12" stroke-width="1.4"/></g>
+  <g transform="translate(178 124) rotate(25)"><ellipse rx="11" ry="5" fill="#FFB36B" stroke="#C25E12" stroke-width="2"/></g>
+  <circle cx="160" cy="146" r="5" fill="#B0124F" opacity=".6"/><circle cx="84" cy="66" r="4" fill="#B0124F" opacity=".5"/>
+  <circle cx="120" cy="96" r="34" fill="#fff" stroke="#FFD1E1" stroke-width="3"/><circle class="pupil" cx="126" cy="100" r="18" fill="#4B3F9E"/><circle cx="118" cy="98" r="6" fill="#A79BFF"/><circle cx="132" cy="93" r="5" fill="#fff"/>
+  <path d="M80 56 112 70M160 56 128 70" stroke="#2A0A1E" stroke-width="8" stroke-linecap="round"/>
+  <path d="M90 142Q120 128 152 142Q120 160 90 142Z" fill="#2A0A1E"/><path d="M100 140l5 6 5-7 5 7 5-7 5 7 5-7 5 6" fill="none" stroke="#fff" stroke-width="2.5" stroke-linejoin="round"/>
+  ${hp<75?`<g transform="translate(170 78) rotate(35)"><rect x="-16" y="-6" width="32" height="12" rx="4" fill="#FFE2B8" stroke="#C9935A" stroke-width="1.5"/><rect x="-5" y="-6" width="10" height="12" fill="#F2C894"/></g>`:''}
+  ${hp<50?`<path d="M62 74q-6 10 0 14q6-4 0-14z" fill="#8FD3FF" stroke="#fff" stroke-width="1.5"/>`:''}
+  ${hp<25?`<path d="M74 96l14 6M200 100l-12 4" stroke="#2A0A1E" stroke-width="3" stroke-linecap="round"/>`:''}
+ </g></svg>`;}
+function levelMap(){const xs=[24,52,78,52],RH=118,rec=(TOPICS.find(t=>!S.read[t.id])||weakest(1)[0]||TOPICS[0]).id;
+ const pts=TOPICS.map((t,i)=>[xs[i%4],i*RH+40]);
+ return `<div class="map" style="height:${TOPICS.length*RH}px"><svg class="trail" viewBox="0 0 100 ${TOPICS.length*RH}" preserveAspectRatio="none" aria-hidden="true"><path d="M${pts.map(p=>p.join(' ')).join(' L')}" fill="none" stroke="var(--line)" stroke-width="6" stroke-dasharray="2 12" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg>
+ ${TOPICS.map((t,i)=>{const m=mastery(t.id),n=S.n[t.id]||0,st=stars(m,n),cls=st>=2?'gold':n||S.read[t.id]?'go':'new';
+  return `<a class="node ${cls} ${t.id===rec?'rec':''}" href="#cours-${t.id}" style="left:${xs[i%4]}%;top:${i*RH+10}px" aria-label="Niveau ${i+1} : ${t.name}, ${st} étoile${st>1?'s':''} sur 3">
+  ${t.id===rec?'<span class="flag">ICI</span>':''}<span class="bub">${i+1}</span><span class="st">${[1,2,3].map(k=>`<i class="${k<=st?'on':''}">★</i>`).join('')}</span><span class="nl">${t.short}</span></a>`;}).join('')}</div>`;}
+function viewHome(){
+ const q=dq(),GOAL=q.g,today=S.days[dayKey()]||0,gm=globalMastery(),hp=Math.max(0,100-gm),dl=daysLeft(),lv=lvlInfo(),ms=missions(),nd=ms.filter(m=>m.done).length;
+ const w=weakest(1),err=errorsPool().length,due=duePool().length,readN=Object.keys(S.read).length;
+ let tip;
+ if(!S.tot&&!readN)tip=`Commence par le niveau 1 sur la carte, puis lance un combat : l’app repère ce que tu sais déjà.`;
+ else if(dl===1)tip=`Interro demain : fais le combat d’entraînement (examen blanc) pour vérifier que tout tient.`;
+ else if(due>0)tip=`${due} question${due>1?'s':''} à revoir avant de les oublier : lance un combat.`;
+ else if(w.length&&w[0].m<60)tip=`Point faible du boss… et le tien : ${w[0].name} (${w[0].m} %).`;
+ else tip=`Tout est bien parti. Continue à frapper le boss tous les jours.`;
+ const cd=dl>1?`J-${dl}`:dl===1?'Demain':dl===0?'Jour J':'Passé';
+ return `<section class="view game">
+ <div class="hud">
+  <div class="lvl"><div class="lv"><small>niv.</small>${lv.L}</div><div class="lvt"><div class="xpbar"><span style="width:${lv.x/lv.need*100}%"></span></div><small>${lv.x} / ${lv.need} XP</small></div></div>
+  <a class="hchest ${S.chests.length?'has':''}" href="#coffres" aria-label="${S.chests.length} coffre${S.chests.length>1?'s':''} à ouvrir">${chestSVG(S.chests.length?S.chests[S.chests.length-1].t:'bronze')}${S.chests.length?`<b>${S.chests.length}</b>`:''}</a>
+ </div>
+ ${reminderDue()?`<button class="banner" data-mstart="smart">${ic('bell')}<p><b>${reminderText()[0]}</b> ${reminderText()[1]}</p>${ic('arrow')}</button>`:''}
+ <div class="arena">
+  <div class="atop"><div><div class="tag">Boss final</div><div class="bname">L’Interro de bio</div><button class="adate" id="chgdate">${examLabel()} · changer</button></div><div class="cdn ${dl<=1&&dl>=0?'hot':''}">${cd}</div></div>
+  <div id="datebox" hidden><input type="date" id="exdate" value="${S.exam}" aria-label="Date de l’interro"></div>
+  <div class="bossbox">${bossSVG(hp)}</div>
+  <div class="hp"><span class="hpl">PV</span><div class="hpbar"><span style="width:${hp}%"></span></div><b>${hp}</b></div>
+  <p class="ahint">Plus tu maîtrises le cours, plus le boss perd de PV. Objectif : 0 avant ${dl>=0?'jeudi':'la prochaine interro'}.</p>
+ </div>
+ <button class="play" data-start="smart"><span>Jouer</span><small>${S.len} questions · combat adaptatif</small></button>
+ <div class="tip">${ic('bulb')}<p>${tip}</p></div>
+ <div class="quests">
+  <div class="qh"><b>Quêtes du jour</b><span>${nd}/3</span></div>
+  <div class="qseg">${ms.map(m=>`<i class="${m.done?'on':''}"></i>`).join('')}</div>
+  ${ms.map(m=>{const inner=`<span class="ck">${m.done?ic('check'):''}</span><span class="tx">${m.label}${m.id==='goal'&&!m.done?`<span class="mini"><span style="width:${Math.min(100,today/GOAL*100)}%"></span></span>`:''}</span><span class="rw">${m.prog&&!m.done?`<em>${m.prog}</em>`:''}${chestSVG('bronze')}</span>`;
+   return m.done?`<div class="qrow done">${inner}</div>`:m.go?`<a class="qrow" href="${m.go}">${inner}</a>`:`<button class="qrow" data-mstart="${m.start}">${inner}</button>`;}).join('')}
+  <p class="qfoot">Les 3 quêtes réussies : ${chestSVG('argent')} coffre en argent bonus</p>
+ </div>
+ <div class="gmodes">
+  <button class="gm m1" data-start="errors">${ic('redo')}<b>Revanche</b><span>${err?`${err} erreur${err>1?'s':''} à corriger`:'Aucune erreur'}</span></button>
+  <button class="gm m2" data-start="cards">${ic('cards')}<b>Cartes éclair</b><span>12 cartes à retourner</span></button>
+  <a class="gm m3" href="#exos">${ic('target')}<b>Entraînement</b><span>Un chapitre au choix</span></a>
+  <button class="gm m4" data-start="exam">${ic('exam')}<b>Combat blanc</b><span>16 questions, note /20</span></button>
+ </div>
+ <div class="maph"><h2 class="h2">Carte des niveaux</h2><span class="hint">${TOPICS.reduce((s,t)=>s+stars(mastery(t.id),S.n[t.id]||0),0)}/${TOPICS.length*3} ★</span></div>
+ ${levelMap()}
+ </section>`;
+}
+function topicRow(id,href=`#cours-${id}`){const t=TMAP[id],m=mastery(id),n=S.n[id]||0,[lab,cls]=level(m,n),i=TOPICS.indexOf(t)+1;
+ return `<a class="trow" href="${href}"><span class="num ${S.read[id]?'read':''}">${S.read[id]?ic('check'):String(i).padStart(2,'0')}</span><span class="nm"><b>${t.name}</b><div class="bar"><span style="width:${m}%"></span></div></span><span class="pill ${cls}">${n?m+' %':lab}</span></a>`;}
+function viewCours(){
+ return `<section class="view"><div><div class="eyebrow">Biologie · 4e</div><h1 class="h1">Le cours</h1><p class="muted" style="margin:6px 0 0">Lis chaque partie, puis entraîne-toi directement dessus.</p></div>
+ <div class="figure" data-cell="animal"></div>
+ <div class="tlist">${TOPICS.map(t=>topicRow(t.id)).join('')}</div></section>`;
+}
+function viewSection(id){
+ const t=TMAP[id],s=SECTIONS[id],i=TOPICS.indexOf(t),prev=TOPICS[i-1],nxt=TOPICS[i+1];
+ const nq=QS.filter(q=>q.t===id).length;
+ return `<section class="view"><a class="link" href="#cours" style="display:inline-flex;align-items:center;gap:6px">${ic('back','style="width:16px;height:16px"')}Tous les chapitres</a>
+ <div class="lesson-head"><div class="eyebrow">Partie ${i+1} sur ${TOPICS.length}${id==='vegetale'?' · cellule végétale':' · cellule animale'}</div><h1 class="h1">${t.name}</h1></div>
+ <div class="lesson">${s.html()}</div>
+ <div class="box key"><span class="eyebrow">Points clés</span><ul>${s.keys.map(k=>`<li>${k}</li>`).join('')}</ul></div>
+ <button class="btn primary block" data-start="topic" data-topic="${id}">${ic('target')}J’ai lu, je m’entraîne (${Math.min(8,nq)} questions)</button>
+ <div class="sec-nav">${prev?`<a class="btn ghost" href="#cours-${prev.id}" style="text-decoration:none">${ic('back')}${prev.short}</a>`:''}${nxt?`<a class="btn ghost" href="#cours-${nxt.id}" style="text-decoration:none">${nxt.short}${ic('arrow')}</a>`:''}</div>
+ </section>`;
+}
+function viewExos(){
+ const err=errorsPool().length;
+ return `<section class="view"><div><div class="eyebrow">Entraînement</div><h1 class="h1">Exercices</h1><p class="muted" style="margin:6px 0 0">${QS.length} questions : QCM, vrai/faux, réponses à écrire, associations et schémas à reconnaître.</p></div>
+ <div class="card" style="display:flex;flex-direction:column;gap:10px"><b>Longueur des sessions</b>
+  <div class="seg" role="group" aria-label="Nombre de questions">${[5,10,20].map(n=>`<button data-len="${n}" class="${S.len===n?'on':''}">${n} questions</button>`).join('')}</div></div>
+ <button class="cta" data-start="smart"><span class="ico">${ic('spark')}</span><span><b>Session intelligente</b><span>Mélange tous les chapitres selon ton niveau</span></span>${ic('arrow','class="go"')}</button>
+ <div class="modes">
+  <button class="mode" data-start="errors"><span class="mi">${ic('redo')}</span><b>Mes erreurs</b><span>${err?`${err} à retravailler`:'Aucune pour l’instant'}</span></button>
+  <button class="mode" data-start="cards"><span class="mi">${ic('cards')}</span><b>Cartes mémo</b><span>${FC.length} cartes</span></button>
+  <button class="mode" data-start="schema"><span class="mi">${ic('target')}</span><b>Schémas</b><span>Reconnaître les organites</span></button>
+  <button class="mode" data-start="exam"><span class="mi">${ic('exam')}</span><b>Examen blanc</b><span>Correction à la fin</span></button>
+ </div>
+ <h2 class="h2">Par chapitre</h2>
+ <div class="tlist">${TOPICS.map(t=>topicRow(t.id,'#exos').replace('<a class="trow" href="#exos"',`<button class="trow" data-start="topic" data-topic="${t.id}"`).replace(/<\/a>$/,'</button>')).join('')}</div>
+ </section>`;
+}
+function viewProgres(){
+ const gm=globalMastery(),acc=S.tot?Math.round(S.ok/S.tot*100):0,h=S.hist.slice(-12);
+ return `<section class="view"><div><div class="eyebrow">Ton suivi</div><h1 class="h1">Progrès</h1></div>
+ <div class="card hero"><div class="ring">${ring(gm)}<div class="val"><b>${gm}%</b><span>maîtrise</span></div></div>
+  <div class="stats3"><div class="stat"><b>${S.tot}</b><span>réponses</span></div><div class="stat"><b>${acc}%</b><span>réussite</span></div><div class="stat"><b>${S.best}</b><span>record j</span></div></div></div>
+ <div class="card" style="display:flex;flex-direction:column;gap:10px"><b>Tes dernières sessions</b>
+  ${h.length?`<div class="spark">${h.map((x,i)=>`<i class="${i===h.length-1?'last':''}" style="height:${Math.max(6,x.s)}%" title="${x.s} %"></i>`).join('')}</div><span class="hint">Score en % de chaque session (la plus récente en foncé).</span>`:'<span class="empty">Fais ta première session pour voir ta courbe ici.</span>'}</div>
+ <h2 class="h2">Maîtrise par chapitre</h2>
+ <div class="tlist">${TOPICS.map(t=>topicRow(t.id)).join('')}</div>
+ <p class="hint">La maîtrise monte plus vite quand tu réussis des questions difficiles. Une question ratée revient plus tard dans la session, puis quelques minutes ou jours après, jusqu’à ce qu’elle soit acquise.</p>
+ <p class="sync ${syncState}" id="sync">${SYNC[syncState]}</p>
+ <div id="resetzone"><button class="btn ghost block" id="reset">Remettre ma progression à zéro</button></div>
+ </section>`;
+}
+
+/* diagrams hydrate */
+function hydrate(root){
+ $$('[data-diagram]',root).forEach(el=>el.innerHTML=DIAGRAMS[el.dataset.diagram]());
+ $$('[data-cell]',root).forEach(el=>{
+  const cell=el.dataset.cell,orgs=CELL_ORGS[cell];
+  el.innerHTML=`<div class="cellsvg">${cell==='animal'?svgAnimal():svgPlant()}</div>
+   <div class="legend">${orgs.map(o=>`<button data-o="${o}"><i style="background:var(${ORG[o].col})"></i>${ORG[o].name.replace('Réticulum endoplasmique','RE')}</button>`).join('')}</div>
+   <div class="info" aria-live="polite"><span class="muted">Touche un organite (sur le schéma ou dans la liste) pour voir son nom et son rôle.</span></div>`;
+  const sv=$('.cellsvg',el),info=$('.info',el);
+  const show=o=>{sv.classList.add('dim');$$('.org',sv).forEach(g=>g.classList.toggle('hl',g.dataset.org===o));
+   $$('.legend button',el).forEach(b=>b.classList.toggle('on',b.dataset.o===o));
+   info.innerHTML=`<b>${ORG[o].name}</b>${ORG[o].role} <a class="link" href="#cours-${ORG[o].t}">Voir la partie</a>`;};
+  $$('.org',sv).forEach(g=>g.addEventListener('click',e=>{e.stopPropagation();show(g.dataset.org);}));
+  $$('.legend button',el).forEach(b=>b.addEventListener('click',()=>show(b.dataset.o)));
+  sv.addEventListener('click',()=>{sv.classList.remove('dim');$$('.org',sv).forEach(g=>g.classList.remove('hl'));$$('.legend button',el).forEach(b=>b.classList.remove('on'));});
+  if(el.dataset.focus)show(el.dataset.focus);
+ });
+}
+function bind(root){
+ $$('[data-start]',root).forEach(b=>b.addEventListener('click',()=>start(b.dataset.start,b.dataset.topic)));
+ $$('[data-mstart]',root).forEach(b=>b.addEventListener('click',()=>{const m=b.dataset.mstart;if(m==='weak'){const w=weakest(1)[0];start('topic',w?w.id:TOPICS[0].id);}else start(m);}));
+ $$('[data-open]',root).forEach(b=>b.addEventListener('click',()=>openChest(+b.dataset.open)));
+ $$('[data-theme-set]',root).forEach(b=>b.addEventListener('click',()=>{S.theme=b.dataset.themeSet;save();applyTheme();render();}));
+ const cd=$('#chgdate',root);if(cd)cd.onclick=()=>{const bx=$('#datebox',root);bx.hidden=!bx.hidden;if(!bx.hidden)$('#exdate',root).focus();};
+ const ed=$('#exdate',root);if(ed)ed.onchange=()=>{if(ed.value){S.exam=ed.value;S.dq=null;save();render();toast('Date de l’interro enregistrée');}};
+ $$('[data-len]',root).forEach(b=>b.addEventListener('click',()=>{S.len=+b.dataset.len;save();render();}));
+ const rs=$('#reset',root);
+ if(rs)rs.addEventListener('click',()=>{$('#resetzone').innerHTML=`<div class="confirm"><p>Effacer toute ta progression (maîtrise, erreurs, série, XP) ? Le cours reste disponible.</p><div><button class="btn ghost" id="rno">Annuler</button><button class="btn danger" id="ryes">Tout effacer</button></div></div>`;
+  $('#rno').onclick=render;$('#ryes').onclick=()=>{const keep={len:S.len,exam:S.exam,rem:S.rem};S=Object.assign(fresh(),keep);applyTheme();save();render();toast('Progression remise à zéro');};});
+}
+function toast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2600);}
+
+/* ---------- sessions ---------- */
+function start(mode,topic){
+ if(mode==='cards')return startCards();
+ let pool,len=S.len;
+ if(mode==='topic'){pool=QS.filter(q=>q.t===topic);len=Math.min(8,pool.length);S.read[topic]=1;save();}
+ else if(mode==='errors'){pool=errorsPool();if(!pool.length){toast('Aucune erreur à revoir. Lance une session intelligente !');return;}len=Math.min(len,pool.length);}
+ else if(mode==='schema'){pool=QS.filter(q=>q.type==='diagram');len=Math.min(10,pool.length);}
+ else pool=QS.slice();
+ sess={mode,topic,len,pool,used:new Set(),requeue:[],log:[],startR:{...S.r},startN:{...S.n},cur:null,done:false};
+ if(mode==='exam'){sess.list=buildExam();sess.len=sess.list.length;}
+ openLayer();next();
+}
+function openLayer(){const z=$('#quiz');z.hidden=false;document.body.style.overflow='hidden';z.scrollTop=0;}
+function closeLayer(){const z=$('#quiz');z.hidden=true;z.innerHTML='';document.body.style.overflow='';sess=null;render();}
+function realCount(){return sess.log.filter(l=>!l.again).length;}
+function next(){
+ const real=realCount();let item;
+ if(sess.mode==='exam'){if(real>=sess.len)return finish();item={q:sess.list[real]};}
+ else{if(real>=sess.len){if(!sess.requeue.length)return finish();const r=sess.requeue.shift();item={q:QMAP[r.id],again:true};}
+  else item=pick();
+  if(!item)return finish();}
+ sess.used.add(item.q.id);
+ sess.cur={...item,start:Date.now()};
+ renderQ();
+}
+function dots(d){return [1,2,3].map(i=>`<i class="${i<=d?'on':''}"></i>`).join('');}
+const KIND={mcq:'Choix unique',tf:'Vrai ou faux',multi:'Plusieurs réponses',input:'Réponse à écrire',match:'Association',diagram:'Schéma'};
+function renderQ(){
+ const {q,again}=sess.cur,z=$('#quiz');
+ const total=sess.mode==='exam'?sess.len:sess.len+sess.log.filter(l=>l.again).length+sess.requeue.length+(again?1:0);
+ const pos=sess.log.length+1,pct=(sess.log.length)/Math.max(total,1)*100;
+ z.innerHTML=`<div class="wrap"><div class="qtop"><button class="iconbtn" id="qclose" aria-label="Terminer la session">${ic('x')}</button><div class="qbar"><span style="width:${pct}%"></span></div><span class="qcount">${pos}/${total}</span></div>
+ <div class="qwrap">
+  <div class="qmeta">${sess.mode==='exam'?'<span class="chip exam">Examen blanc</span>':''}<span class="chip">${TMAP[q.t].short}</span>${again?'<span class="chip warn">Rappel</span>':''}<span class="diff" aria-label="Difficulté ${q.d} sur 3">niveau ${dots(q.d)}</span></div>
+  <div><div class="qkind">${KIND[q.type]}${q.type==='multi'?' · coche tout ce qui est juste':''}</div><h2 class="qtext" style="margin-top:6px">${q.q}</h2></div>
+  <div id="qbody"></div>
+  <div id="qfb"></div>
+ </div></div>`;
+ z.scrollTop=0;
+ $('#qclose').onclick=()=>{realCount()||sess.log.length?finish():closeLayer();};
+ const body=$('#qbody');
+ ({mcq:rMCQ,tf:rTF,multi:rMulti,input:rInput,match:rMatch,diagram:rDiagram})[q.type](q,body);
+}
+function skipBtn(){return `<button class="skip" id="qskip">Je ne sais pas</button>`;}
+function wireSkip(cb){const s=$('#qskip');if(s)s.onclick=cb;}
+function rMCQ(q,body,choices=q.c,ans=q.a){
+ const order=shuffle(choices.map((c,i)=>i));
+ body.innerHTML=`<div class="choices">${order.map((i,k)=>`<button class="choice" data-i="${i}"><span class="k">${'ABCD'[k]}</span><span>${choices[i]}</span></button>`).join('')}</div><div class="qactions" style="margin-top:6px">${skipBtn()}</div>`;
+ const lock=(sel)=>{body.classList.add('locked');const ok=sel===ans;
+  $$('.choice',body).forEach(b=>{const i=+b.dataset.i;if(sess.mode==='exam'){if(i===sel)b.classList.add('sel');}else{if(i===ans)b.classList.add('ok');else if(i===sel)b.classList.add('ko');}});
+  grade(ok?1:0);};
+ $$('.choice',body).forEach(b=>b.onclick=()=>lock(+b.dataset.i));
+ wireSkip(()=>lock(-1));
+}
+function rTF(q,body){
+ body.innerHTML=`<div class="tf"><button class="choice" data-v="1">Vrai</button><button class="choice" data-v="0">Faux</button></div><div class="qactions" style="margin-top:6px">${skipBtn()}</div>`;
+ const lock=v=>{body.classList.add('locked');$$('.choice',body).forEach(b=>{const bv=b.dataset.v==='1';
+   if(sess.mode==='exam'){if(bv===v)b.classList.add('sel');}else{if(bv===q.a)b.classList.add('ok');else if(bv===v)b.classList.add('ko');}});
+  grade(v===q.a?1:0);};
+ $$('.choice',body).forEach(b=>b.onclick=()=>lock(b.dataset.v==='1'));
+ wireSkip(()=>lock(null));
+}
+function rMulti(q,body){
+ const order=shuffle(q.c.map((c,i)=>i)),sel=new Set();
+ body.innerHTML=`<div class="choices">${order.map(i=>`<button class="choice" data-i="${i}" aria-pressed="false"><span class="k">${ic('check','style="width:15px;height:15px;opacity:.0"')}</span><span>${q.c[i]}</span></button>`).join('')}</div>
+ <div class="qactions" style="margin-top:6px">${skipBtn()}<button class="btn primary" id="qok" disabled>Valider</button></div>`;
+ $$('.choice',body).forEach(b=>b.onclick=()=>{const i=+b.dataset.i;sel.has(i)?sel.delete(i):sel.add(i);b.classList.toggle('sel');b.setAttribute('aria-pressed',sel.has(i));$('svg',b).style.opacity=sel.has(i)?1:0;$('#qok').disabled=!sel.size;});
+ const lock=()=>{body.classList.add('locked');$('.qactions',body).remove();
+  let good=0;q.c.forEach((c,i)=>{const should=q.a.includes(i),did=sel.has(i);if(should===did)good++;});
+  if(sess.mode!=='exam')$$('.choice',body).forEach(b=>{const i=+b.dataset.i,should=q.a.includes(i),did=sel.has(i);b.classList.remove('sel');
+   if(should&&did)b.classList.add('ok');else if(!should&&did)b.classList.add('ko');else if(should&&!did)b.classList.add('miss');});
+  const score=good===q.c.length?1:(good/q.c.length>=0.75?0.5:0);grade(score);};
+ $('#qok').onclick=lock;wireSkip(()=>{sel.clear();lock();});
+}
+const norm=s=>s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[’'`]/g,' ').replace(/\b(le|la|les|l|un|une|des|du|de|d|en)\b/g,' ').replace(/[^a-z0-9]+/g,' ').trim();
+function lev(a,b){const m=a.length,n=b.length;if(!m)return n;if(!n)return m;let p=Array.from({length:n+1},(_,i)=>i);
+ for(let i=1;i<=m;i++){const c=[i];for(let j=1;j<=n;j++)c[j]=Math.min(p[j]+1,c[j-1]+1,p[j-1]+(a[i-1]===b[j-1]?0:1));p=c;}return p[n];}
+function checkInput(q,val){const v=norm(val);if(!v)return{score:0};
+ for(const a of q.a){const n=norm(a);if(v===n)return{score:1};}
+ for(const a of q.a){const n=norm(a),tol=n.length>=9?2:n.length>=5?1:0;if(tol&&lev(v,n)<=tol)return{score:1,typo:true};}
+ return{score:0};}
+function rInput(q,body){
+ body.innerHTML=`<form class="inp" id="qform" autocomplete="off"><input id="qin" type="text" placeholder="Ta réponse…" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done"><div class="qactions">${skipBtn()}<button class="btn primary" type="submit">Valider</button></div></form>`;
+ const inp=$('#qin');setTimeout(()=>{try{inp.focus({preventScroll:true});}catch(e){}},150);
+ const lock=(val)=>{const r=checkInput(q,val);inp.readOnly=true;$('.qactions',body).remove();
+  if(sess.mode!=='exam')inp.classList.add(r.score?'ok':'ko');inp.blur();
+  grade(r.score,r.typo?`Accepté, mais attention à l’orthographe : <b>${q.a[0]}</b>.`:'');};
+ $('#qform').addEventListener('submit',e=>{e.preventDefault();if(inp.value.trim())lock(inp.value);});
+ wireSkip(()=>lock(''));
+}
+const PCOL=['var(--c-re)','var(--c-mito)','var(--c-golgi)','var(--c-membrane)'];
+function rMatch(q,body){
+ const L=q.p.map((p,i)=>i),R=shuffle(q.p.map((p,i)=>i));const pair={},rev={};let selL=null;
+ body.innerHTML=`<p class="hint" style="margin:0">Touche un élément à gauche, puis celui qui lui correspond à droite.</p>
+ <div class="match"><div class="mcol">${L.map(i=>`<button class="mbtn" data-l="${i}">${q.p[i][0]}</button>`).join('')}</div><div class="mcol">${R.map(i=>`<button class="mbtn" data-r="${i}">${q.p[i][1]}</button>`).join('')}</div></div>
+ <div class="qactions">${skipBtn()}<button class="btn primary" id="qok" disabled>Valider</button></div>`;
+ const paint=()=>{$$('[data-l]',body).forEach(b=>{const i=+b.dataset.l;b.classList.toggle('sel',selL===i);
+   if(pair[i]!=null){const k=Object.keys(pair).map(Number).sort().indexOf(i);b.dataset.p=k+1;b.style.setProperty('--pc',PCOL[k%4]);}else{delete b.dataset.p;}});
+  $$('[data-r]',body).forEach(b=>{const r=+b.dataset.r;if(rev[r]!=null){const k=Object.keys(pair).map(Number).sort().indexOf(rev[r]);b.dataset.p=k+1;b.style.setProperty('--pc',PCOL[k%4]);}else delete b.dataset.p;});
+  $('#qok').disabled=Object.keys(pair).length!==q.p.length;};
+ $$('[data-l]',body).forEach(b=>b.onclick=()=>{const i=+b.dataset.l;if(pair[i]!=null){delete rev[pair[i]];delete pair[i];}selL=i;paint();});
+ $$('[data-r]',body).forEach(b=>b.onclick=()=>{const r=+b.dataset.r;if(selL==null){if(rev[r]!=null){delete pair[rev[r]];delete rev[r];paint();}return;}
+  if(rev[r]!=null)delete pair[rev[r]];pair[selL]=r;rev[r]=selL;selL=null;
+  const free=L.find(i=>pair[i]==null);if(free!=null)selL=free;paint();});
+ selL=0;paint();
+ const lock=()=>{body.classList.add('locked');$('.qactions',body).remove();let good=0;
+  L.forEach(i=>{const b=$(`[data-l="${i}"]`,body);const ok=pair[i]===i;if(ok)good++;if(sess.mode!=='exam'){b.classList.add(ok?'ok':'ko');}});
+  if(sess.mode!=='exam')$$('[data-r]',body).forEach(b=>{const r=+b.dataset.r;b.classList.add(rev[r]===r?'ok':'ko');});
+  grade(good===q.p.length?1:good>=q.p.length-1&&good>=2?0.5:0);};
+ $('#qok').onclick=lock;wireSkip(lock);
+}
+function rDiagram(q,body){
+ const others=shuffle(Object.keys(ORG).filter(o=>o!==q.org&&!(q.org==='rer'&&o==='rel')&&!(q.org==='rel'&&o==='rer'))).slice(0,3);
+ const pool=shuffle([q.org,...others]);
+ const wrap=document.createElement('div');wrap.className='figure';
+ wrap.innerHTML=`<div class="cellsvg dim">${q.cell==='animal'?svgAnimal():svgPlant()}</div>`;
+ body.appendChild(wrap);$$('.org',wrap).forEach(g=>{g.style.cursor='default';if(g.dataset.org===q.org)g.classList.add('hl');});
+ const ch=document.createElement('div');body.appendChild(ch);
+ rMCQ(q,ch,pool.map(o=>ORG[o].name),pool.indexOf(q.org));
+}
+function answerText(q){
+ if(q.type==='mcq')return q.c[q.a];
+ if(q.type==='tf')return q.a?'Vrai':'Faux';
+ if(q.type==='multi')return q.a.map(i=>q.c[i]).join(' · ');
+ if(q.type==='input')return q.a[0];
+ if(q.type==='match')return q.p.map(p=>`${p[0]} → ${p[1]}`).join(' · ');
+ if(q.type==='diagram')return ORG[q.org].name;
+}
+const PRAISE=['Bien vu !','Exact !','Parfait !','Bravo !','Impeccable !'];
+function grade(score,note=''){
+ const {q,again}=sess.cur,tBefore=target(q.t);
+ record(q,score);
+ sess.log.push({id:q.id,score,again:!!again});
+ if(score<1&&sess.mode!=='exam'&&!again)sess.requeue.push({id:q.id,at:sess.log.length+3});
+ if(sess.mode==='exam'){setTimeout(next,350);return;}
+ const tAfter=target(q.t),good=score>=1,half=score>=0.5&&score<1;
+ const lvl=tAfter>tBefore?`<div class="lvl">${ic('up')}Niveau supérieur en ${TMAP[q.t].short} : questions plus difficiles !</div>`:'';
+ $('#qfb').innerHTML=`<div class="fb ${good?'good':'bad'}"><div class="fbhead">${ic(good?'check':'x')}${good?PRAISE[Math.floor(Math.random()*PRAISE.length)]:half?'Presque !':'Pas tout à fait'}</div>
+  ${!good?`<p><b>Réponse :</b> ${answerText(q)}</p>`:''}${note?`<p>${note}</p>`:''}<p>${q.x}</p>
+  ${!good&&!again?'<p class="hint" style="margin:0">Cette question reviendra un peu plus loin dans la session.</p>':''}${lvl}
+  <div class="fbact"><button class="btn ghost" id="qsheet">${ic('book')}Revoir le cours</button><button class="btn primary" id="qnext">Continuer${ic('arrow')}</button></div></div>`;
+ $('#qnext').onclick=next;$('#qsheet').onclick=()=>openSheet(q.t);
+ setTimeout(()=>$('#qfb').scrollIntoView({behavior:'smooth',block:'nearest'}),60);
+}
+function finish(){
+ if(!sess)return;const z=$('#quiz');const real=sess.log.filter(l=>!l.again);
+ if(!real.length){closeLayer();return;}
+ const pct=Math.round(real.reduce((s,l)=>s+l.score,0)/real.length*100);
+ S.hist.push({d:dayKey(),s:pct,n:real.length});S.hist=S.hist.slice(-40);save();
+ onSessionDone(sess.mode,pct,real.length);
+ const touched=[...new Set(sess.log.map(l=>QMAP[l.id].t))];
+ const wrong=[...new Map(sess.log.filter(l=>l.score<1).map(l=>[l.id,l])).keys()].filter(id=>!sess.log.some(l=>l.id===id&&l.again&&l.score>=1));
+ const exam=sess.mode==='exam',note20=Math.round(pct/5*10)/10;
+ const msg=pct>=90?'Excellent travail !':pct>=70?'Très bien, continue comme ça.':pct>=50?'C’est en route. Les erreurs vont revenir pour que tu les fixes.':'Pas grave : relis les parties en rouge, puis refais une session.';
+ const xpGain=real.reduce((s,l)=>s+(l.score>=1?10:3),0);
+ z.innerHTML=`<div class="wrap"><div class="qtop"><button class="iconbtn" id="sclose" aria-label="Fermer">${ic('x')}</button></div>
+ <div class="view">
+  <div class="sum-top"><div class="ring">${ring(pct,150,14,pct>=70?'var(--good)':pct>=50?'var(--warn)':'var(--bad)')}<div class="val"><b>${exam?note20:pct+'%'}</b><span>${exam?'sur 20':'de réussite'}</span></div></div>
+   <h1 class="h1">${msg}</h1><p class="muted" style="margin:0">+${xpGain} XP · ${real.length} questions${sess.log.length>real.length?` · ${sess.log.length-real.length} rappel${sess.log.length-real.length>1?'s':''}`:''}</p></div>
+  <h2 class="h2">Ta maîtrise a bougé</h2>
+  <div class="delta">${touched.map(t=>{const b=mastery(t,sess.startR,sess.startN),a=mastery(t),d=a-b;
+   return `<div class="drow"><b>${TMAP[t].name}</b><small class="${d>0?'up':d<0?'down':''}">${b} → ${a} %</small><div class="bar"><span style="width:${a}%"></span></div></div>`;}).join('')}</div>
+  ${exam?`<h2 class="h2">Correction</h2><div class="review">${real.map(l=>{const q=QMAP[l.id];return `<div class="rv ${l.score>=1?'okk':''}"><p><b>${q.q}</b></p><p class="a">${l.score>=1?'Juste':'Réponse'} : ${answerText(q)}</p></div>`;}).join('')}</div>`
+   :wrong.length?`<h2 class="h2">À revoir</h2><div class="review">${wrong.map(id=>{const q=QMAP[id];return `<div class="rv"><p><b>${q.q}</b></p><p class="a">${answerText(q)}</p></div>`;}).join('')}</div>`:''}
+  ${gainsHTML()}
+  <div class="fbact"><button class="btn ghost" id="shome">Accueil</button><button class="btn primary" id="sagain">${ic('redo')}Nouvelle session</button></div>
+ </div></div>`;
+ z.scrollTop=0;const m=sess.mode,t=sess.topic;
+ $('#sclose').onclick=closeLayer;$('#shome').onclick=()=>{closeLayer();go('accueil');};wireGains();
+ $('#sagain').onclick=()=>{sess=null;start(m==='exam'?'exam':m==='topic'?'topic':'smart',t);};
+}
+
+/* flashcards */
+function startCards(){
+ const now=Date.now();
+ const sc=c=>{const st=S.q[c.id];let s=(1-mastery(c.t)/100)*2+Math.random();if(!st)s+=1;else if(st.due<=now)s+=2;else s-=2;return s;};
+ const deck=FC.map(c=>({c,s:sc(c)})).sort((a,b)=>b.s-a.s).slice(0,12).map(x=>x.c);
+ sess={mode:'cards',deck,i:0,log:[],startR:{...S.r},startN:{...S.n}};openLayer();renderCard();
+}
+function renderCard(){
+ const z=$('#quiz');if(sess.i>=sess.deck.length)return finishCards();
+ const c=sess.deck[sess.i];
+ z.innerHTML=`<div class="wrap"><div class="qtop"><button class="iconbtn" id="qclose" aria-label="Terminer">${ic('x')}</button><div class="qbar"><span style="width:${sess.i/sess.deck.length*100}%"></span></div><span class="qcount">${sess.i+1}/${sess.deck.length}</span></div>
+ <div class="qwrap"><div class="qmeta"><span class="chip">${TMAP[c.t].short}</span></div>
+  <div class="fc" id="fc" role="button" tabindex="0" aria-label="Retourner la carte"><div class="fc-in">
+   <div class="fc-face fc-front"><span class="eyebrow">Question</span><div class="big">${c.f}</div><span class="hint">Réponds dans ta tête, puis touche la carte.</span></div>
+   <div class="fc-face fc-back"><span class="eyebrow">Réponse</span><div class="big">${c.b}</div></div></div></div>
+  <div id="rate"><button class="btn ghost block" id="flip">Retourner la carte</button></div>
+ </div></div>`;
+ const flip=()=>{const fc=$('#fc');if(fc.classList.contains('flip'))return;fc.classList.add('flip');
+  $('#rate').innerHTML=`<p class="hint" style="margin:0 0 8px;text-align:center">Tu avais la bonne réponse ?</p><div class="rate"><button class="btn r0" data-s="0">Non</button><button class="btn r1" data-s="0.5">À moitié</button><button class="btn r2" data-s="1">Oui</button></div>`;
+  $$('#rate [data-s]').forEach(b=>b.onclick=()=>{const s=+b.dataset.s;record(c,s);sess.log.push({id:c.id,score:s});sess.i++;renderCard();});};
+ $('#fc').onclick=flip;$('#fc').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();flip();}};$('#flip').onclick=flip;
+ $('#qclose').onclick=()=>sess.log.length?finishCards():closeLayer();
+}
+function finishCards(){
+ const z=$('#quiz'),n=sess.log.length,known=sess.log.filter(l=>l.score>=1).length,pct=n?Math.round(sess.log.reduce((s,l)=>s+l.score,0)/n*100):0;
+ const miss=sess.log.filter(l=>l.score<1).map(l=>FC.find(c=>c.id===l.id));
+ if(n)onSessionDone('cards',pct,n);
+ z.innerHTML=`<div class="wrap"><div class="qtop"><button class="iconbtn" id="sclose" aria-label="Fermer">${ic('x')}</button></div><div class="view">
+ <div class="sum-top"><div class="ring">${ring(pct,150,14,pct>=70?'var(--good)':'var(--warn)')}<div class="val"><b>${known}/${n}</b><span>cartes sues</span></div></div><h1 class="h1">${pct>=80?'Tu connais bien tes cartes !':'Les cartes ratées reviendront bientôt.'}</h1></div>
+ ${miss.length?`<h2 class="h2">À revoir</h2><div class="review">${miss.map(c=>`<div class="rv"><p><b>${c.f}</b></p><p class="a">${c.b}</p></div>`).join('')}</div>`:''}
+ ${gainsHTML()}
+ <div class="fbact"><button class="btn ghost" id="shome">Accueil</button><button class="btn primary" id="sagain">${ic('redo')}Encore des cartes</button></div></div></div>`;
+ z.scrollTop=0;$('#sclose').onclick=closeLayer;$('#shome').onclick=()=>{closeLayer();go('accueil');};wireGains();$('#sagain').onclick=startCards;
+}
+
+/* course sheet (from a question) */
+function openSheet(id){
+ const s=SECTIONS[id],bg=document.createElement('div');bg.className='sheet-bg';
+ bg.innerHTML=`<div class="sheet" role="dialog" aria-label="${TMAP[id].name}"><div class="grab"></div><div class="wrap view"><div class="sec-head"><h2 class="h2">${TMAP[id].name}</h2><button class="iconbtn" id="shx" aria-label="Fermer">${ic('x')}</button></div><div class="lesson">${s.html()}</div><div class="box key"><span class="eyebrow">Points clés</span><ul>${s.keys.map(k=>`<li>${k}</li>`).join('')}</ul></div><button class="btn primary block" id="shok">Retour à l’exercice</button></div></div>`;
+ document.body.appendChild(bg);hydrate(bg);
+ $$('a[href^="#cours-"]',bg).forEach(a=>a.addEventListener('click',e=>{e.preventDefault();const t=a.getAttribute('href').slice(7);bg.remove();openSheet(t);}));
+ const close=()=>bg.remove();bg.addEventListener('click',e=>{if(e.target===bg)close();});$('#shx',bg).onclick=close;$('#shok',bg).onclick=close;
+}
+
+/* ---------- interro, missions, coffres, rappels ---------- */
+const DAYMS=864e5;
+const JOURS=['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
+const MOIS=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+const parseDay=k=>{const [y,m,d]=k.split('-').map(Number);return new Date(y,m-1,d);};
+function nextThu(){const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()+(4-d.getDay()+7)%7);return dayKey(d);}
+if(!S.exam){S.exam=nextThu();save(true);}
+function daysLeft(){const t=new Date();t.setHours(0,0,0,0);return Math.round((parseDay(S.exam)-t)/DAYMS);}
+function examLabel(){const d=parseDay(S.exam);return `${JOURS[d.getDay()]} ${d.getDate()} ${MOIS[d.getMonth()]}`;}
+function calcGoal(){const dl=daysLeft();if(dl===0)return 10;if(dl<0)return 20;
+ const left=QS.filter(q=>!(S.q[q.id]&&S.q[q.id].b>=2)).length;return Math.max(15,Math.min(30,Math.ceil(left/dl)+5));}
+function dq(){const t=dayKey();if(!S.dq||S.dq.d!==t)S.dq={d:t,f:{},got:{},g:calcGoal()};return S.dq;}
+function dayTheme(dl){return dl>=4?'Découverte':dl===3?'Points faibles':dl===2?'Erreurs & mémo':dl===1?'Examen blanc':dl===0?'Jour J':'Révision';}
+function missions(){
+ const dl=daysLeft(),q=dq(),f=q.f,today=S.days[dayKey()]||0;let m2,m3;
+ if(dl>=4)m3={id:'topic',label:Object.keys(S.read).length<TOPICS.length?'Lire un chapitre, puis faire ses questions':'Faire une série « par chapitre »',go:'#cours'};
+ else if(dl===3)m3={id:'topic',label:'Travailler ton chapitre le plus faible',start:'weak'};
+ else if(dl===1)m3={id:'exam',label:'Faire l’examen blanc (vise 14/20)',start:'exam'};
+ else m3={id:'cards',label:dl===0?'Échauffement : une série de cartes mémo':'Faire une série de cartes mémo',start:'cards'};
+ if((dl===2||dl===0)&&(errorsPool().length||f.errors))m2={id:'errors',label:'Revoir toutes tes erreurs',start:'errors'};
+ else m2={id:'s70',label:'Finir une session à 70 % ou plus',start:'smart'};
+ const list=[{id:'goal',label:`Répondre à ${q.g} questions`,prog:`${Math.min(today,q.g)}/${q.g}`,start:'smart',done:today>=q.g},m2,m3];
+ list.forEach(m=>{if(m.done==null)m.done=!!f[m.id];});return list;
+}
+function flag(k){dq().f[k]=1;}
+function checkMissions(){const q=dq(),ms=missions();
+ ms.forEach(m=>{if(m.done&&!q.got[m.id]){q.got[m.id]=1;giveChest('bronze','Mission réussie : '+m.label.toLowerCase());}});
+ if(ms.every(m=>m.done)&&!q.got.all){q.got.all=1;giveChest('argent','Les 3 missions du jour');}
+ save();renderChrome();}
+function onSessionDone(mode,pct,n){const q=dq();
+ if(pct>=70&&n>=5)flag('s70');
+ if(mode==='topic')flag('topic');
+ if(mode==='errors')flag('errors');
+ if(mode==='cards')flag('cards');
+ if(mode==='exam'){flag('exam');if(pct>=70&&!q.got.ex14){q.got.ex14=1;giveChest('or','Examen blanc à 14/20 ou plus');}}
+ else if(mode!=='cards'&&pct>=90&&n>=8&&(q.got.p90||0)<2){q.got.p90=(q.got.p90||0)+1;giveChest('bronze','Session à 90 % ou plus');}
+ checkMissions();}
+
+/* chests */
+const CHEST={bronze:{name:'Coffre en bronze',c:['#C98445','#8A5428','#F6D2A8'],w:[70,25,5,0],rolls:1,xp:[15,30]},
+ argent:{name:'Coffre en argent',c:['#B9C3D3','#5E6B80','#F2F5FA'],w:[45,35,17,3],rolls:2,xp:[30,60]},
+ or:{name:'Coffre en or',c:['#F4BE32','#A8700F','#FFF3C4'],w:[20,35,35,10],rolls:3,xp:[60,120]}};
+function chestSVG(t){const c=CHEST[t].c;
+ return `<svg viewBox="0 0 120 104" class="chest" aria-hidden="true"><ellipse cx="60" cy="98" rx="46" ry="5" fill="rgba(0,0,0,.18)"/>
+ <rect x="14" y="48" width="92" height="46" rx="6" fill="${c[0]}" stroke="${c[1]}" stroke-width="3"/><rect x="16" y="76" width="88" height="5" fill="${c[1]}" opacity=".3"/><rect x="26" y="48" width="9" height="46" fill="${c[1]}"/><rect x="85" y="48" width="9" height="46" fill="${c[1]}"/>
+ <g class="lid"><path d="M14 50V36Q14 14 60 14Q106 14 106 36V50Z" fill="${c[0]}" stroke="${c[1]}" stroke-width="3" stroke-linejoin="round"/><path d="M30.5 49V20M89.5 49V20" stroke="${c[1]}" stroke-width="9"/><path d="M40 22Q60 17 80 22" stroke="${c[2]}" stroke-width="3.5" fill="none" stroke-linecap="round"/></g>
+ <g class="lock"><rect x="50" y="42" width="20" height="22" rx="4" fill="${c[2]}" stroke="${c[1]}" stroke-width="2.5"/><circle cx="60" cy="51" r="3" fill="${c[1]}"/><rect x="58.5" y="52" width="3" height="7" rx="1" fill="${c[1]}"/></g></svg>`;}
+function giveChest(t,why){S.chests.push({t,why});save();
+ if(sess&&sess.log)(sess.gains||(sess.gains=[])).push({t,why});
+ toast(`${CHEST[t].name} gagné !`);}
+
+/* stickers */
+const RAR=[null,{n:'Commun',c:'#8E9AAF'},{n:'Rare',c:'#2F6FD1'},{n:'Épique',c:'#9B4F96'},{n:'Légendaire',c:'#E0A526'}];
+const STK=[
+ {id:'membrane',n:'Membrane',r:1,s:`<circle r="22" fill="var(--c-cyto)" stroke="var(--c-membrane)" stroke-width="3"/><circle r="17" fill="none" stroke="var(--c-membrane)" stroke-width="1.6" stroke-dasharray="3 3"/>`},
+ {id:'noyau',n:'Noyau',r:1,s:`<circle r="20" fill="var(--c-nucleus-fill)" stroke="var(--c-nucleus)" stroke-width="3"/><circle cx="4" cy="-3" r="7" fill="var(--c-nucleus)"/>`},
+ {id:'mito',n:'Mitochondrie',r:1,s:mitoShape(0,0,-20,1.15)},
+ {id:'golgi',n:'Golgi',r:1,s:golgiShape(0,-12,.9)},
+ {id:'lyso',n:'Lysosome',r:1,s:`<g transform="scale(2.4)">${lysoShape(0,0)}</g>`},
+ {id:'rer',n:'RE rugueux',r:1,s:`${[-10,0,10].map(y=>`<path d="M-20 ${y}Q-10 ${y-6} 0 ${y}T20 ${y}" fill="none" stroke="var(--c-re)" stroke-width="3" stroke-linecap="round"/>`).join('')}${[-16,-6,4,14].map(x=>`<circle cx="${x}" cy="-14" r="2" fill="var(--c-ribo)"/><circle cx="${x+4}" cy="-4" r="2" fill="var(--c-ribo)"/><circle cx="${x}" cy="6" r="2" fill="var(--c-ribo)"/>`).join('')}`},
+ {id:'paroi',n:'Paroi',r:1,s:`<rect x="-21" y="-19" width="42" height="38" rx="7" fill="var(--c-wall-fill)" stroke="var(--c-wall)" stroke-width="5"/><rect x="-14" y="-12" width="28" height="24" rx="4" fill="none" stroke="var(--c-membrane)" stroke-width="1.8"/>`},
+ {id:'vacuole',n:'Vacuole',r:1,s:`<path d="M-18 -6Q-16 -20 0 -17Q18 -20 19 -2Q20 16 2 17Q-20 18 -18 -6Z" fill="var(--c-vac)" stroke="var(--c-vac-stroke)" stroke-width="3"/>`},
+ {id:'rel',n:'RE lisse',r:2,s:`${[-9,3].map(y=>`<path d="M-21 ${y}C-12 ${y-12} -6 ${y+12} 3 ${y}S15 ${y-10} 21 ${y}" fill="none" stroke="var(--c-re)" stroke-width="5" stroke-linecap="round"/>`).join('')}`},
+ {id:'centro',n:'Centrosome',r:2,s:`<rect x="-15" y="-5" width="22" height="10" rx="3" fill="none" stroke="var(--c-centro)" stroke-width="3" transform="rotate(-20)"/><rect x="-3" y="-15" width="10" height="22" rx="3" fill="none" stroke="var(--c-centro)" stroke-width="3" transform="rotate(20)"/>`},
+ {id:'chloro',n:'Chloroplaste',r:2,s:`<g transform="scale(1.25)">${chloroShape(0,0,-15)}</g>`},
+ {id:'atp',n:'ATP',r:2,s:`<circle r="21" fill="var(--c-mito-fill)" stroke="var(--c-mito)" stroke-width="3"/><path d="M3 -15 -8 2h8l-3 13 11-17h-8z" fill="var(--c-mito)"/>`},
+ {id:'adn',n:'ADN',r:3,s:`<path d="M-8 -22C14 -11 -14 11 8 22M8 -22C-14 -11 14 11 -8 22" fill="none" stroke="var(--c-nucleus)" stroke-width="3.2" stroke-linecap="round"/>${[-14,-5,5,14].map(y=>`<path d="M${-6+Math.abs(y)/4} ${y}H${6-Math.abs(y)/4}" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"/>`).join('')}`},
+ {id:'canimal',n:'Cellule animale',r:3,s:`<path d="M-22 -2Q-20 -20 0 -20Q22 -21 22 0Q21 20 0 21Q-23 20 -22 -2Z" fill="var(--c-cyto)" stroke="var(--c-membrane)" stroke-width="2.6"/><circle cx="-3" cy="-2" r="8" fill="var(--c-nucleus-fill)" stroke="var(--c-nucleus)" stroke-width="2"/><ellipse cx="11" cy="10" rx="5" ry="2.6" fill="var(--c-mito-fill)" stroke="var(--c-mito)" stroke-width="1.5" transform="rotate(-25 11 10)"/><circle cx="10" cy="-11" r="2.6" fill="var(--c-lyso)"/>`},
+ {id:'cplante',n:'Cellule végétale',r:3,s:`<rect x="-22" y="-19" width="44" height="38" rx="5" fill="var(--c-pcyto)" stroke="var(--c-wall)" stroke-width="4"/><rect x="-10" y="-10" width="20" height="20" rx="5" fill="var(--c-vac)" stroke="var(--c-vac-stroke)" stroke-width="1.6"/><ellipse cx="-15" cy="11" rx="4" ry="2" fill="var(--c-chloro)"/><ellipse cx="14" cy="-12" rx="4" ry="2" fill="var(--c-chloro)"/><circle cx="14" cy="10" r="4" fill="var(--c-nucleus-fill)" stroke="var(--c-nucleus)" stroke-width="1.4"/>`},
+ {id:'mitodor',n:'Mitochondrie dorée',r:4,s:`<circle r="25" fill="#FFF3C4"/><g transform="translate(0 0) rotate(-20) scale(1.1)"><ellipse rx="22" ry="10" fill="#F4BE32" stroke="#A8700F" stroke-width="2.2"/><polyline points="-16,0 -12,-6 -8,5 -4,-6 0,5 4,-6 8,5 12,-6 16,0" fill="none" stroke="#A8700F" stroke-width="1.6" stroke-linejoin="round"/></g><path d="M18 -20l2 5 5 2-5 2-2 5-2-5-5-2 5-2z" fill="#E0A526"/>`}
+];
+const STKMAP=Object.fromEntries(STK.map(s=>[s.id,s]));
+const stkSVG=s=>`<svg viewBox="-30 -30 60 60" aria-hidden="true">${s.s}</svg>`;
+const THEMES=[{id:'rose',n:'Framboise',l:'#D2336B',d:'#FF5A91'},{id:'ocean',n:'Océan',l:'#2F6FD1',d:'#6FA2FF'},{id:'chloro',n:'Chlorophylle',l:'#1F8A4C',d:'#5FD68F'},
+ {id:'mito',n:'Énergie',l:'#D9731E',d:'#FF9F4F'},{id:'noyau',n:'Noyau',l:'#5A4BC0',d:'#A79BFF'},{id:'golgi',n:'Lagon',l:'#118A7E',d:'#3FD6C6'}];
+function isDark(){const t=document.documentElement.dataset.theme;return t==='dark'||(t!=='light'&&matchMedia('(prefers-color-scheme: dark)').matches);}
+function applyTheme(){const r=document.documentElement.style,th=THEMES.find(x=>x.id===S.theme);
+ if(!th||th.id==='rose'){['--accent','--accent-soft'].forEach(p=>r.removeProperty(p));return;}
+ const d=isDark(),a=d?th.d:th.l;r.setProperty('--accent',a);r.setProperty('--accent-soft',`color-mix(in srgb,${a} ${d?24:14}%,${d?'#151833':'#fff'})`);}
+new MutationObserver(applyTheme).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',applyTheme);}catch(e){}
+const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+function wpick(w){let x=Math.random()*w.reduce((s,v)=>s+v,0);for(let i=0;i<w.length;i++){x-=w[i];if(x<0)return i;}return 0;}
+function rollChest(t){const C=CHEST[t],out=[];
+ for(let k=0;k<C.rolls;k++){
+  const kind=k===0&&t!=='bronze'?'stk':['stk','xp','shield','theme'][wpick(t==='bronze'?[60,25,10,5]:[50,18,16,16])];
+  if(kind==='theme'){const locked=THEMES.filter(x=>!S.themes.includes(x.id));
+   if(locked.length){const th=locked[rnd(0,locked.length-1)];S.themes.push(th.id);out.push({k:'theme',th});continue;}}
+  if(kind==='shield'&&S.shield<3){S.shield++;out.push({k:'shield'});continue;}
+  if(kind==='stk'||kind==='theme'||kind==='shield'){
+   const r=wpick(C.w)+1,pool=STK.filter(s=>s.r===r);const s=pool[rnd(0,pool.length-1)];
+   const isNew=!S.col[s.id];S.col[s.id]=(S.col[s.id]||0)+1;let bonus=0;if(!isNew){bonus=10*s.r;S.xp+=bonus;}
+   out.push({k:'stk',s,isNew,bonus});continue;}
+  const x=rnd(...C.xp);S.xp+=x;out.push({k:'xp',x});}
+ save();return out;}
+function rewardHTML(r,i){const st=`style="animation-delay:${.15*i}s"`;
+ if(r.k==='stk'){const R=RAR[r.s.r];return `<div class="rwd" style="--rc:${R.c};animation-delay:${.15*i}s"><div class="disc">${stkSVG(r.s)}</div><b>${r.s.n}</b><small>${R.n}${r.isNew?' · Nouveau !':` · doublon +${r.bonus} XP`}</small></div>`;}
+ if(r.k==='xp')return `<div class="rwd" ${st}><div class="big">+${r.x}</div><b>XP bonus</b></div>`;
+ if(r.k==='shield')return `<div class="rwd" ${st}><div class="disc" style="--rc:#2F6FD1">${shieldSVG()}</div><b>Bouclier de série</b><small style="color:#5B5F86">Sauve ta série si tu rates un jour</small></div>`;
+ return `<div class="rwd" ${st}><div class="disc" style="--rc:${r.th.l};background:${r.th.l}"></div><b>Thème ${r.th.n}</b><button class="btn primary" data-usetheme="${r.th.id}" style="min-height:36px;padding:6px 12px;font-size:13px;min-width:0">Utiliser</button></div>`;}
+function shieldSVG(){return `<svg viewBox="-30 -30 60 60" aria-hidden="true"><path d="M0 -22 18 -15V0C18 12 9 19 0 23-9 19-18 12-18 0V-15Z" fill="#DCE7FB" stroke="#2F6FD1" stroke-width="3" stroke-linejoin="round"/><path d="M-6 0 -1 5 8 -5" fill="none" stroke="#2F6FD1" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;}
+function openChest(i){const ch=S.chests[i];if(!ch)return;S.chests.splice(i,1);const res=rollChest(ch.t);
+ const el=document.createElement('div');el.className='copen';el.setAttribute('role','dialog');el.setAttribute('aria-label',CHEST[ch.t].name);
+ el.innerHTML=`<div class="stage"><div class="glow"></div>${chestSVG(ch.t)}</div><h2 class="h2">${CHEST[ch.t].name}</h2><div class="rewards" aria-live="polite"></div><button class="btn primary" id="cok" hidden>Super !</button>`;
+ document.body.appendChild(el);const cs=$('svg.chest',el);cs.classList.add('shake');
+ const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+ setTimeout(()=>{cs.classList.remove('shake');el.classList.add('open');
+  setTimeout(()=>{$('.rewards',el).innerHTML=res.map(rewardHTML).join('');$('h2',el).textContent=res.length>1?'Tu as gagné :':'Tu as gagné';
+   $$('[data-usetheme]',el).forEach(b=>b.onclick=()=>{S.theme=b.dataset.usetheme;save();applyTheme();b.textContent='Activé';b.disabled=true;});
+   const ok=$('#cok',el);ok.hidden=false;ok.focus();},reduce?0:350);},reduce?0:950);
+ $('#cok',el).onclick=()=>{el.remove();render();};}
+
+/* reminders */
+const notifOK=()=>'Notification' in window;
+function notify(title,body){toast(title);
+ if(notifOK()&&Notification.permission==='granted'){try{new Notification(title,{body,tag:'revise-cellule'});}catch(e){}}}
+function reminderDue(){if(!S.rem.on)return false;const [h,m]=S.rem.time.split(':').map(Number),n=new Date(),t=new Date();t.setHours(h,m,0,0);
+ return n>=t&&(S.days[dayKey()]||0)<dq().g&&daysLeft()>=0;}
+function reminderText(){const dl=daysLeft(),left=Math.max(0,dq().g-(S.days[dayKey()]||0));
+ if(dl===1)return ['Interro demain !','Fais l’examen blanc ce soir pour vérifier que tout tient.'];
+ if(dl===0)return ['C’est le jour J','Un petit échauffement avec les cartes mémo avant l’interro ?'];
+ return ['C’est l’heure de réviser',`Encore ${left} question${left>1?'s':''} pour ta mission du jour. Interro dans ${dl} jours.`];}
+function tickReminder(){if(reminderDue()&&S.rem.last!==dayKey()){S.rem.last=dayKey();save();const [t,b]=reminderText();notify(t,b);if(route==='accueil'&&!sess)render();}}
+setInterval(tickReminder,30e3);
+function openReminders(){
+ const bg=document.createElement('div');bg.className='sheet-bg';
+ const paint=()=>{const p=notifOK()?Notification.permission:'none';
+  bg.innerHTML=`<div class="sheet" role="dialog" aria-label="Rappels"><div class="grab"></div><div class="wrap view">
+  <div class="sec-head"><h2 class="h2">Rappels</h2><button class="iconbtn" id="rx" aria-label="Fermer">${ic('x')}</button></div>
+  <div class="switch"><div><b>Rappel chaque jour</b><span>Si ta mission du jour n’est pas finie</span></div><button class="tog" id="ron" role="switch" aria-checked="${S.rem.on}" aria-label="Rappel quotidien"></button></div>
+  <div class="switch"><div><b>Heure du rappel</b><span>Interro ${examLabel()}</span></div><input type="time" id="rtime" value="${S.rem.time}" aria-label="Heure du rappel"></div>
+  ${p==='granted'?`<div class="nstat ok">Notifications autorisées. Elles apparaissent tant que l’app reste ouverte dans un onglet.</div><button class="btn ghost block" id="rtest">Tester une notification</button>`
+   :p==='denied'?`<div class="nstat ko">Les notifications sont bloquées pour cette page. Tes rappels s’afficheront dans l’app, sur l’accueil, dès que tu l’ouvres.</div>`
+   :p==='default'?`<button class="btn primary block" id="rperm">${ic('bell')}Autoriser les notifications</button><p class="hint" style="margin:0">Sans autorisation, le rappel s’affiche quand même dans l’app à l’heure choisie.</p>`
+   :`<div class="nstat ko">Ce navigateur n’affiche pas de notifications ici. Tes rappels s’afficheront sur l’accueil de l’app.</div>`}
+  <p class="hint" style="margin:0">Astuce : garde l’app ouverte dans un onglet, ou ouvre-la chaque soir à l’heure du rappel.</p>
+  </div></div>`;
+  $('#rx',bg).onclick=()=>{bg.remove();render();};
+  $('#ron',bg).onclick=()=>{S.rem.on=!S.rem.on;S.rem.last=null;save();paint();};
+  $('#rtime',bg).onchange=e=>{if(e.target.value){S.rem.time=e.target.value;S.rem.last=null;save();}};
+  const pb=$('#rperm',bg);if(pb)pb.onclick=async()=>{try{const r=await Notification.requestPermission();if(r==='granted'&&!S.rem.on){S.rem.on=true;save();}}catch(e){}paint();};
+  const tb=$('#rtest',bg);if(tb)tb.onclick=()=>{const [t,b]=reminderText();notify(t,b);};};
+ paint();document.body.appendChild(bg);bg.addEventListener('click',e=>{if(e.target===bg){bg.remove();render();}});}
+
+/* home & chests views */
+function interroCard(){const dl=daysLeft();
+ const cd=dl>1?`J-${dl}`:dl===1?'Demain':dl===0?'Jour J':'Passée';
+ const days=[];if(dl>=0){const t=new Date();t.setHours(0,0,0,0);for(let i=Math.max(0,dl-6);i<=dl;i++){const d=new Date(t);d.setDate(t.getDate()+i);days.push({d,dl:dl-i,now:i===0});}}
+ return `<div class="interro"><div class="top"><div><div class="lab">Interro de bio</div><div class="when">${examLabel()}</div><button class="chg" id="chgdate">Changer la date</button></div><div class="cd" aria-label="${dl>=0?dl+' jours restants':'interro passée'}">${cd}</div></div>
+ <div id="datebox" hidden><input type="date" id="exdate" value="${S.exam}" aria-label="Date de l’interro"></div>
+ ${days.length?`<div class="days">${days.map(x=>`<div class="day ${x.now?'now':''} ${x.dl===0?'jj':''}"><b>${x.now?'Auj.':JOURS[x.d.getDay()].slice(0,3)+'.'}</b>${dayTheme(x.dl)}</div>`).join('')}</div>`:'<p style="margin:0;font-size:14px;opacity:.8">Choisis la date de ta prochaine interro pour recevoir un plan jour par jour.</p>'}</div>`;}
+function missionsHTML(){const ms=missions(),allDone=ms.every(m=>m.done);
+ return `<div class="sec-head"><h2 class="h2">Missions du jour</h2><span class="hint">${allDone?'Toutes réussies !':dayTheme(daysLeft())}</span></div>
+ <div class="miss">${ms.map(m=>{const inner=`<span class="ck">${m.done?ic('check'):''}</span><span class="tx">${m.label}</span><span class="rw">${m.prog&&!m.done?m.prog:''}${chestSVG('bronze')}</span>`;
+  return m.done?`<div class="mrow done">${inner}</div>`:m.go?`<a class="mrow" href="${m.go}">${inner}</a>`:`<button class="mrow" data-mstart="${m.start}">${inner}</button>`;}).join('')}
+ <p class="hint" style="margin:0">Chaque mission rapporte un coffre en bronze. Les trois réussies : un coffre en argent en plus.</p></div>`;}
+function bannersHTML(){let h='';
+ if(reminderDue()){const [t,b]=reminderText();h+=`<button class="banner" data-mstart="smart">${ic('bell')}<p><b>${t}</b> ${b}</p>${ic('arrow')}</button>`;}
+ if(S.chests.length)h+=`<a class="banner gift" href="#coffres" style="text-decoration:none">${chestSVG(S.chests[S.chests.length-1].t)}<p><b>${S.chests.length} coffre${S.chests.length>1?'s':''} à ouvrir</b> Découvre ce qu’il y a dedans.</p>${ic('arrow')}</a>`;
+ return h;}
+function viewCoffres(){const got=STK.filter(s=>S.col[s.id]).length;
+ return `<section class="view"><div><h1 class="h1">Coffres</h1><p class="muted" style="margin:6px 0 0">Gagne des coffres en révisant, puis ouvre-les pour compléter ta collection.</p></div>
+ ${S.chests.length?`<div class="chests">${S.chests.map((c,i)=>`<button class="cbox" data-open="${i}">${chestSVG(c.t)}<b>${CHEST[c.t].name}</b><span>${c.why}</span></button>`).join('')}</div>`
+  :`<div class="card" style="display:flex;gap:14px;align-items:center"><span style="flex:none;width:72px;opacity:.5">${chestSVG('bronze')}</span><p style="margin:0;font-size:15px">Aucun coffre à ouvrir. Termine une mission du jour pour en gagner un.</p></div>`}
+ <div class="statsrow"><div class="card">${ic('spark')}<div><b>${S.xp}</b><span>XP</span></div></div><div class="card">${shieldSVG().replace('<svg ','<svg style="color:inherit" ')}<div><b>${S.shield}/3</b><span>boucliers de série</span></div></div></div>
+ <div class="sec-head"><h2 class="h2">Ta collection</h2><span class="hint">${got}/${STK.length}</span></div>
+ <div class="coll">${STK.map(s=>S.col[s.id]?`<div class="stk" style="--rc:${RAR[s.r].c}"><div class="disc">${stkSVG(s)}${S.col[s.id]>1?`<i>×${S.col[s.id]}</i>`:''}</div>${s.n}</div>`:`<div class="stk lock"><div class="disc">?</div>${RAR[s.r].n}</div>`).join('')}</div>
+ <h2 class="h2">Thèmes de couleur</h2>
+ <div class="themes">${THEMES.map(t=>{const own=S.themes.includes(t.id);return `<button class="th ${S.theme===t.id?'on':''} ${own?'':'lock'}" ${own?`data-theme-set="${t.id}"`:'disabled'} style="--sw:${isDark()?t.d:t.l}"><i></i>${own?t.n:'À gagner'}</button>`;}).join('')}</div>
+ <div class="card"><b>Comment gagner des coffres</b><ul class="how" style="margin-top:8px">
+  <li>Chaque mission du jour : coffre en bronze</li><li>Les 3 missions du jour : coffre en argent</li><li>Session à 90 % ou plus : coffre en bronze (2 par jour)</li><li>Examen blanc à 14/20 ou plus : coffre en or</li><li>Série de 3 jours : argent · 7, 14 et 30 jours : or</li></ul></div>
+ </section>`;}
+function gainsHTML(){const g=sess&&sess.gains||[];if(!g.length)return '';
+ return `<div class="gains"><b>Tu as gagné ${g.length} coffre${g.length>1?'s':''}</b>${g.map(x=>`<div class="g">${chestSVG(x.t)}<span><b>${CHEST[x.t].name}</b> · ${x.why}</span></div>`).join('')}<button class="btn primary block" id="sopen">Ouvrir mes coffres</button></div>`;}
+function wireGains(){const b=$('#sopen');if(b)b.onclick=()=>{const z=$('#quiz');z.hidden=true;z.innerHTML='';document.body.style.overflow='';sess=null;if(location.hash==='#coffres')render();else go('coffres');};}
+$('#bell').addEventListener('click',openReminders);
+
+window.addEventListener('hashchange',()=>{if(sess)closeLayer();else render();});
+applyTheme();render();tickReminder();initCloud();try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist();}catch(e){}
+</script>
+
+</body></html>
